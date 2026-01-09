@@ -73,6 +73,84 @@ class ThreatenedSpeciesFactsheet {
     }
   }
 
+  /**
+   * Fetch all species for navigation
+   * @returns {Promise<Array>} Array of all species
+   */
+  async fetchAllSpecies() {
+    try {
+      const response = await fetch(this.apiUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("Invalid API response");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching species list:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Populate sidebar navigation with species list
+   * @param {Array} speciesList - Array of all species
+   * @param {string|null} currentSpecies - Currently selected species name
+   */
+  populateSidebarNavigation(speciesList, currentSpecies = null) {
+    const sidebar = document.querySelector(".col-md-4.my-4.d-print-none");
+    if (!sidebar) return;
+
+    const currentSpeciesLower = currentSpecies
+      ? currentSpecies.toLowerCase()
+      : null;
+
+    // Sort species alphabetically by scientific name
+    const sortedSpecies = [...speciesList].sort((a, b) => {
+      const nameA = (a.scientific_name || "").toLowerCase();
+      const nameB = (b.scientific_name || "").toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    let navHTML = `
+      <section class="ntg-sidenav">
+        <div class="ntg-sidenav__title">
+          <a href="example.html">Threatened Plant Species</a>
+        </div>
+        <ul class="list-group list-group-flush pt-0">
+    `;
+
+    sortedSpecies.forEach((species) => {
+      const scientificName = species.scientific_name || "Unknown";
+      const isActive =
+        currentSpeciesLower &&
+        scientificName.toLowerCase() === currentSpeciesLower;
+      const activeClass = isActive ? " active" : "";
+      const encodedName = encodeURIComponent(scientificName.replace(/ /g, "+"));
+
+      navHTML += `
+          <li class="list-group-item${activeClass}">
+            <a href="example.html?species=${encodedName}" title="${this.escapeHtml(
+        scientificName
+      )}">
+              <em>${this.escapeHtml(scientificName)}</em>
+            </a>
+          </li>
+      `;
+    });
+
+    navHTML += `
+        </ul>
+      </section>
+    `;
+
+    sidebar.innerHTML = navHTML;
+  }
+
   init() {
     if (!this.element) {
       console.error("ThreatenedSpeciesFactsheet: No element provided");
@@ -285,6 +363,12 @@ if (typeof window !== "undefined") {
         factsheet.showLoading();
 
         const speciesName = factsheet.getSpeciesFromUrl();
+
+        // Fetch all species for sidebar navigation
+        const allSpecies = await factsheet.fetchAllSpecies();
+        factsheet.populateSidebarNavigation(allSpecies, speciesName);
+
+        // Fetch and display current species
         const speciesData = await factsheet.fetchSpeciesData(speciesName);
 
         if (speciesData) {
