@@ -24,6 +24,17 @@ class ThreatenedSpeciesFactsheet {
     this.render();
   }
 
+  /**
+   * Escape HTML to prevent XSS attacks
+   * @param {string} str - String to escape
+   * @returns {string} Escaped string
+   */
+  escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
   render() {
     // Placeholder render method
     this.element.classList.add('threatened-species-factsheet');
@@ -34,11 +45,18 @@ class ThreatenedSpeciesFactsheet {
   }
 
   generateFactsheetHTML(data) {
+    // Escape title to prevent XSS
+    const escapedTitle = this.escapeHtml(data.title || 'Threatened Species');
+    
+    // For content, we allow HTML but it should be sanitized by the caller
+    // or use textContent for plain text
+    const content = data.content || 'No content available';
+    
     return `
       <div class="factsheet-container">
-        <h2 class="factsheet-title">${data.title || 'Threatened Species'}</h2>
+        <h2 class="factsheet-title">${escapedTitle}</h2>
         <div class="factsheet-content">
-          ${data.content || 'No content available'}
+          ${content}
         </div>
       </div>
     `;

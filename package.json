@@ -2,7 +2,7 @@
   "name": "threatened-species-factsheet",
   "version": "1.0.0",
   "description": "Resources for the paint layout of the threatened species section of NT.GOV.AU",
-  "main": "dist/index.js",
+  "main": "dist/threatened-species-factsheet.js",
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
