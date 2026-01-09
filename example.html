@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threatened Species Factsheet - Example</title>
+  <link rel="stylesheet" href="dist/threatened-species-factsheet.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Threatened Species Factsheet Example</h1>
+    <div id="factsheet"></div>
+  </div>
+  
+  <script src="dist/threatened-species-factsheet.js"></script>
+  <script>
+    // Initialize the factsheet
+    const factsheet = new ThreatenedSpeciesFactsheet({
+      element: document.getElementById('factsheet'),
+      data: {
+        title: 'Northern Quoll (Dasyurus hallucatus)',
+        content: `
+          <h3>Conservation Status</h3>
+          <p>Endangered</p>
+          
+          <h3>Description</h3>
+          <p>The Northern Quoll is a carnivorous marsupial native to northern Australia. 
+          It is the smallest of the four quoll species, weighing between 300-900 grams.</p>
+          
+          <h3>Habitat</h3>
+          <p>Rocky areas, eucalypt forests, and woodlands across northern Australia.</p>
+          
+          <h3>Threats</h3>
+          <ul>
+            <li>Predation by feral cats</li>
+            <li>Cane toad poisoning</li>
+            <li>Habitat loss from fires and land clearing</li>
+            <li>Changed fire regimes</li>
+          </ul>
+          
+          <h3>Conservation Actions</h3>
+          <ul>
+            <li>Establishing predator-free islands and fenced areas</li>
+            <li>Fire management programs</li>
+            <li>Captive breeding programs</li>
+            <li>Community education and awareness</li>
+          </ul>
+        `
+      }
+    });
+  </script>
+</body>
+</html>
