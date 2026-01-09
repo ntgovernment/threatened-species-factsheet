@@ -25,9 +25,12 @@
   
   <script src="dist/threatened-species-factsheet.js"></script>
   <script>
-    // Initialize the factsheet
+    // Initialize the factsheet with allowHtml option
+    // WARNING: Only set allowHtml: true if you trust the content source
+    // or have properly sanitized the HTML to prevent XSS attacks
     const factsheet = new ThreatenedSpeciesFactsheet({
       element: document.getElementById('factsheet'),
+      allowHtml: true, // Allow HTML in content (ensure content is trusted/sanitized)
       data: {
         title: 'Northern Quoll (Dasyurus hallucatus)',
         content: `

@@ -44,9 +44,20 @@ Include the built CSS and JS files in your HTML:
   
   <script src="dist/threatened-species-factsheet.js"></script>
   <script>
-    // Initialize the factsheet
+    // Initialize the factsheet with plain text content (secure by default)
     const factsheet = new ThreatenedSpeciesFactsheet({
       element: document.getElementById('factsheet'),
+      data: {
+        title: 'Northern Quoll',
+        content: 'The Northern Quoll is a threatened species...'
+      }
+    });
+
+    // Or with HTML content (requires allowHtml: true)
+    // WARNING: Only use allowHtml with trusted/sanitized content
+    const factsheetWithHtml = new ThreatenedSpeciesFactsheet({
+      element: document.getElementById('factsheet'),
+      allowHtml: true, // Enable HTML rendering
       data: {
         title: 'Northern Quoll',
         content: '<p>The Northern Quoll is a threatened species...</p>'
@@ -56,6 +67,14 @@ Include the built CSS and JS files in your HTML:
 </body>
 </html>
 ```
+
+### Security
+
+By default, the factsheet escapes all HTML in the content field to prevent XSS attacks. If you need to render HTML content:
+
+1. Set `allowHtml: true` in the constructor options
+2. Ensure the content is from a trusted source or properly sanitized
+3. Never render user-generated content with `allowHtml: true` without sanitization
 
 ## Development
 

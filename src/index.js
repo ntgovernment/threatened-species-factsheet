@@ -9,6 +9,7 @@ class ThreatenedSpeciesFactsheet {
   constructor(options = {}) {
     this.element = options.element || null;
     this.data = options.data || null;
+    this.allowHtml = options.allowHtml || false;
     
     if (this.element) {
       this.init();
@@ -35,6 +36,20 @@ class ThreatenedSpeciesFactsheet {
     return div.innerHTML;
   }
 
+  /**
+   * Safely render content - escapes HTML by default unless allowHtml is true
+   * @param {string} content - Content to render
+   * @param {boolean} allowHtml - Whether to allow HTML in content
+   * @returns {string} Safe content
+   */
+  renderContent(content, allowHtml = false) {
+    if (!allowHtml) {
+      return this.escapeHtml(content);
+    }
+    // If allowHtml is true, content should be pre-sanitized by the caller
+    return content;
+  }
+
   render() {
     // Placeholder render method
     this.element.classList.add('threatened-species-factsheet');
@@ -48,9 +63,12 @@ class ThreatenedSpeciesFactsheet {
     // Escape title to prevent XSS
     const escapedTitle = this.escapeHtml(data.title || 'Threatened Species');
     
-    // For content, we allow HTML but it should be sanitized by the caller
-    // or use textContent for plain text
-    const content = data.content || 'No content available';
+    // Content rendering with XSS protection
+    // By default, HTML is escaped. Set allowHtml: true in constructor to allow HTML
+    const content = this.renderContent(
+      data.content || 'No content available',
+      this.allowHtml
+    );
     
     return `
       <div class="factsheet-container">
