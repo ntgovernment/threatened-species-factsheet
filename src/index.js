@@ -1,5 +1,5 @@
 // Import styles
-import './styles/main.scss';
+import "./styles/main.scss";
 
 /**
  * Threatened Species Factsheet
@@ -10,18 +10,75 @@ class ThreatenedSpeciesFactsheet {
     this.element = options.element || null;
     this.data = options.data || null;
     this.allowHtml = options.allowHtml || false;
-    
+
+    // Use local JSON file for localhost, API for production
+    const isLocalhost =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1");
+
+    this.apiUrl = isLocalhost
+      ? "/get-threatened-plant-species.json"
+      : "https://nt.gov.au/environment/dev/threatened-species/get-threatened-plant-species";
+
     if (this.element) {
       this.init();
     }
   }
 
+  /**
+   * Get species name from URL query string
+   * @returns {string|null} Species scientific name or null if not found
+   */
+  getSpeciesFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const species = params.get("species");
+    return species ? decodeURIComponent(species.replace(/\+/g, " ")) : null;
+  }
+
+  /**
+   * Fetch species data from API
+   * @param {string|null} scientificName - Scientific name to search for, or null for first species
+   * @returns {Promise<Object|null>} Species data object or null if not found
+   */
+  async fetchSpeciesData(scientificName = null) {
+    try {
+      const response = await fetch(this.apiUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("Invalid API response");
+      }
+
+      // If no scientific name provided, return first species
+      if (!scientificName) {
+        return data[0];
+      }
+
+      // Case-insensitive search for species
+      const speciesLower = scientificName.toLowerCase();
+      const foundSpecies = data.find(
+        (species) =>
+          species.scientific_name &&
+          species.scientific_name.toLowerCase() === speciesLower
+      );
+
+      return foundSpecies || null;
+    } catch (error) {
+      console.error("Error fetching species data:", error);
+      throw error;
+    }
+  }
+
   init() {
     if (!this.element) {
-      console.error('ThreatenedSpeciesFactsheet: No element provided');
+      console.error("ThreatenedSpeciesFactsheet: No element provided");
       return;
     }
-    
+
     this.render();
   }
 
@@ -31,7 +88,7 @@ class ThreatenedSpeciesFactsheet {
    * @returns {string} Escaped string
    */
   escapeHtml(str) {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
   }
@@ -50,34 +107,159 @@ class ThreatenedSpeciesFactsheet {
     return content;
   }
 
+  /**
+   * Show loading state
+   */
+  showLoading() {
+    if (!this.element) return;
+    this.element.innerHTML = `
+      <div class="factsheet-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading species information...</p>
+      </div>
+    `;
+  }
+
+  /**
+   * Show error state
+   * @param {string} message - Error message to display
+   */
+  showError(message = "An error occurred while loading species data") {
+    if (!this.element) return;
+    this.element.innerHTML = `
+      <div class="factsheet-error">
+        <h3>Error</h3>
+        <p>${this.escapeHtml(message)}</p>
+        <p>Please try again later.</p>
+      </div>
+    `;
+  }
+
+  /**
+   * Show not found state
+   * @param {string} scientificName - The species name that was not found
+   */
+  showNotFound(scientificName) {
+    if (!this.element) return;
+    this.element.innerHTML = `
+      <div class="factsheet-not-found">
+        <h3>Species Not Found</h3>
+        <p>The species "${this.escapeHtml(
+          scientificName
+        )}" was not found in the database.</p>
+        <p>Please check the species name and try again.</p>
+      </div>
+    `;
+  }
+
   render() {
     // Placeholder render method
-    this.element.classList.add('threatened-species-factsheet');
-    
+    this.element.classList.add("threatened-species-factsheet");
+
     if (this.data) {
       this.element.innerHTML = this.generateFactsheetHTML(this.data);
     }
   }
 
   generateFactsheetHTML(data) {
-    // Escape title to prevent XSS
-    const escapedTitle = this.escapeHtml(data.title || 'Threatened Species');
-    
-    // Content rendering with XSS protection
-    // By default, HTML is escaped. Set allowHtml: true in constructor to allow HTML
-    const content = this.renderContent(
-      data.content || 'No content available',
-      this.allowHtml
+    const escapedScientificName = this.escapeHtml(
+      data.scientific_name || "Unknown Species"
     );
-    
-    return `
-      <div class="factsheet-container">
-        <h2 class="factsheet-title">${escapedTitle}</h2>
-        <div class="factsheet-content">
-          ${content}
+
+    // Helper function to render sections only if content exists
+    const renderSection = (title, content, htmlClass = "") => {
+      if (!content) return "";
+      const renderedContent = this.renderContent(content, this.allowHtml);
+      return `
+        <div class="factsheet-section ${htmlClass}">
+          <h3>${this.escapeHtml(title)}</h3>
+          <div class="section-content">${renderedContent}</div>
         </div>
-      </div>
-    `;
+      `;
+    };
+
+    // Conservation status badge helper
+    const getStatusBadge = (status, label) => {
+      if (!status) return "";
+      const statusClass = status.toLowerCase().replace(/\s+/g, "-");
+      return `<span class="status-badge status-${statusClass}">${label}: ${this.escapeHtml(
+        status
+      )}</span>`;
+    };
+
+    // Build HTML sections
+    let html = `<div class="factsheet-container">`;
+
+    // Title and basic info
+    html += `<h2 class="factsheet-title"><em>${escapedScientificName}</em></h2>`;
+
+    // Common name and family
+    if (data.common_name || data.family_name) {
+      html += `<div class="factsheet-meta">`;
+      if (data.common_name) {
+        html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
+          data.common_name
+        )}</p>`;
+      }
+      if (data.family_name) {
+        html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
+          data.family_name
+        )}</p>`;
+      }
+      html += `</div>`;
+    }
+
+    // Conservation status badges
+    if (data.conservation_status_nt || data.conservation_status_australia) {
+      html += `<div class="conservation-status">`;
+      html += getStatusBadge(data.conservation_status_nt, "NT Status");
+      html += getStatusBadge(
+        data.conservation_status_australia,
+        "Australian Status"
+      );
+      html += `</div>`;
+    }
+
+    // Distribution map
+    if (data.map_image_name) {
+      const mapUrl = `https://nt.gov.au/environment/native-plants/threatened-plants/maps/${encodeURIComponent(
+        data.map_image_name
+      )}`;
+      html += `
+        <div class="distribution-map">
+          <img src="${mapUrl}" 
+               alt="Distribution map for ${escapedScientificName}" 
+               onerror="this.style.display='none'"
+               loading="lazy">
+        </div>
+      `;
+    }
+
+    // Content sections
+    html += `<div class="factsheet-content">`;
+    html += renderSection("Description", data.description, "description");
+    html += renderSection("Distribution", data.distribution, "distribution");
+    html += renderSection(
+      "Ecology and Life History",
+      data.ecology_and_life_history,
+      "ecology"
+    );
+    html += renderSection(
+      "Threatening Processes",
+      data.threatening_processes,
+      "threats"
+    );
+    html += renderSection(
+      "Conservation Objectives and Management",
+      data.conservation_objectives_and_management,
+      "conservation"
+    );
+    html += renderSection("References", data.references, "references");
+    html += `</div>`;
+
+    html += `</div>`;
+
+    return html;
   }
 
   update(data) {
@@ -87,3 +269,37 @@ class ThreatenedSpeciesFactsheet {
 }
 
 export default ThreatenedSpeciesFactsheet;
+
+// Auto-initialize on page load
+if (typeof window !== "undefined") {
+  document.addEventListener("DOMContentLoaded", async () => {
+    const contentArea = document.getElementById("content_area");
+
+    if (contentArea) {
+      const factsheet = new ThreatenedSpeciesFactsheet({
+        element: contentArea,
+        allowHtml: true,
+      });
+
+      try {
+        factsheet.showLoading();
+
+        const speciesName = factsheet.getSpeciesFromUrl();
+        const speciesData = await factsheet.fetchSpeciesData(speciesName);
+
+        if (speciesData) {
+          factsheet.update(speciesData);
+        } else if (speciesName) {
+          factsheet.showNotFound(speciesName);
+        } else {
+          factsheet.showError("No species data available");
+        }
+      } catch (error) {
+        console.error("Failed to load species data:", error);
+        factsheet.showError(
+          "Failed to load species data. Please check your internet connection and try again."
+        );
+      }
+    }
+  });
+}
