@@ -151,6 +151,31 @@ class ThreatenedSpeciesFactsheet {
     sidebar.innerHTML = navHTML;
   }
 
+  /**
+   * Update page metadata with species name
+   * @param {string} scientificName - Scientific name of the species
+   */
+  updatePageMetadata(scientificName) {
+    if (!scientificName) return;
+
+    const escapedName = this.escapeHtml(scientificName);
+
+    // Update document title
+    document.title = `${escapedName} - Factsheet | NT.GOV.AU`;
+
+    // Update h1 heading
+    const h1 = document.querySelector("h1");
+    if (h1) {
+      h1.innerHTML = `<em>${escapedName}</em>`;
+    }
+
+    // Update breadcrumb active item
+    const breadcrumbActive = document.querySelector(".breadcrumb-item.active");
+    if (breadcrumbActive) {
+      breadcrumbActive.innerHTML = `<em>${escapedName}</em>`;
+    }
+  }
+
   init() {
     if (!this.element) {
       console.error("ThreatenedSpeciesFactsheet: No element provided");
@@ -343,6 +368,11 @@ class ThreatenedSpeciesFactsheet {
   update(data) {
     this.data = data;
     this.render();
+
+    // Update page metadata
+    if (data && data.scientific_name) {
+      this.updatePageMetadata(data.scientific_name);
+    }
   }
 }
 
