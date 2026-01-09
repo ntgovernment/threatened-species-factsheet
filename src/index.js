@@ -207,7 +207,10 @@ class ThreatenedSpeciesFactsheet {
       return this.escapeHtml(content);
     }
     // If allowHtml is true, content should be pre-sanitized by the caller
-    return content;
+    // Remove empty paragraphs like <p><br></p> or <p></p>
+    return content
+      .replace(/<p>\s*<br\s*\/?>\s*<\/p>/gi, "")
+      .replace(/<p>\s*<\/p>/gi, "");
   }
 
   /**
@@ -275,7 +278,7 @@ class ThreatenedSpeciesFactsheet {
       const renderedContent = this.renderContent(content, this.allowHtml);
       return `
         <div class="factsheet-section ${htmlClass}">
-          <h3>${this.escapeHtml(title)}</h3>
+          <h2>${this.escapeHtml(title)}</h2>
           <div class="section-content">${renderedContent}</div>
         </div>
       `;
@@ -292,9 +295,6 @@ class ThreatenedSpeciesFactsheet {
 
     // Build HTML sections
     let html = `<div class="factsheet-container">`;
-
-    // Title and basic info
-    html += `<h2 class="factsheet-title"><em>${escapedScientificName}</em></h2>`;
 
     // Common name and family
     if (data.common_name || data.family_name) {
