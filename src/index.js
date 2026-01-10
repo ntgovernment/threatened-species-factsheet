@@ -119,7 +119,7 @@ class ThreatenedSpeciesFactsheet {
     let navHTML = `
       <section class="ntg-sidenav">
         <div class="ntg-sidenav__title">
-          <a href="example.html">Threatened Plant Species</a>
+          <a href="example.html">Threatened plant species</a>
         </div>
         <ul class="list-group list-group-flush pt-0">
     `;
