@@ -264,7 +264,52 @@ class ThreatenedSpeciesFactsheet {
 
     if (this.data) {
       this.element.innerHTML = this.generateFactsheetHTML(this.data);
+      // Initialize accordion toggle functionality
+      this.initAccordionToggles();
     }
+  }
+
+  initAccordionToggles() {
+    // Find all accordion togglers
+    const accordionTogglers = document.querySelectorAll(".accordion-toggler");
+
+    accordionTogglers.forEach((toggler) => {
+      const accordionId = toggler.id.replace("accordionToggle-", "");
+      const accordion = document.querySelector(
+        `[data-accordion-id="${accordionId}"]`
+      );
+
+      if (!accordion) return;
+
+      const openLink = toggler.querySelector(".open");
+      const closeLink = toggler.querySelector(".close");
+
+      if (openLink) {
+        openLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          const collapses = accordion.querySelectorAll(".accordion-collapse");
+          collapses.forEach((collapse) => {
+            const bsCollapse = new bootstrap.Collapse(collapse, {
+              toggle: false,
+            });
+            bsCollapse.show();
+          });
+        });
+      }
+
+      if (closeLink) {
+        closeLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          const collapses = accordion.querySelectorAll(".accordion-collapse");
+          collapses.forEach((collapse) => {
+            const bsCollapse = new bootstrap.Collapse(collapse, {
+              toggle: false,
+            });
+            bsCollapse.hide();
+          });
+        });
+      }
+    });
   }
 
   generateFactsheetHTML(data) {
@@ -293,6 +338,42 @@ class ThreatenedSpeciesFactsheet {
           <h2>${this.escapeHtml(
             title
           )}</h2>          ${prependContent}          <div class="section-content">${renderedContent}</div>
+        </div>
+      `;
+    };
+
+    // Helper function to render sections without heading
+    const renderSectionWithoutHeading = (
+      content,
+      htmlClass = "",
+      prependContent = ""
+    ) => {
+      if (!content) return "";
+      const renderedContent = this.renderContent(content, this.allowHtml);
+      return `
+        <div class="factsheet-section ${htmlClass}">
+          ${prependContent}          <div class="section-content">${renderedContent}</div>
+        </div>
+      `;
+    };
+
+    // Helper function to render accordion item
+    const renderAccordionItem = (title, content, id, prependContent = "") => {
+      if (!content) return "";
+      const renderedContent = this.renderContent(content, this.allowHtml);
+      return `
+        <div class="accordion-item border-0 border-bottom">
+          <div class="accordion-header my-0" id="heading-${id}">
+            <button class="accordion-button rounded-0 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${id}" aria-expanded="false" aria-controls="collapse-${id}">
+              ${this.escapeHtml(title)}
+            </button>
+          </div>
+          <div id="collapse-${id}" class="accordion-collapse d-print-block collapse" aria-labelledby="heading-${id}">
+            <div class="accordion-body">
+              ${prependContent}
+              ${renderedContent}
+            </div>
+          </div>
         </div>
       `;
     };
@@ -407,7 +488,28 @@ class ThreatenedSpeciesFactsheet {
 
     // Content sections
     html += `<div class="factsheet-content">`;
-    html += renderSection("Description", data.description, "description");
+    html += renderSectionWithoutHeading(data.description, "description");
+
+    // Accordion sections (Distribution to References)
+    const accordionId = "accordion-" + Date.now();
+    html += `
+      <div class="accordion-toggler ntg-accordion-toggler pt-2 pb-2" id="accordionToggle-${accordionId}">
+        <div class="row g-2 justify-content-end">
+          <div class="col-auto">
+            <a href="#" class="open" aria-expanded="false">
+              <strong class="me-1">Open all</strong>
+            </a>
+          </div>
+          <div class="col-auto">
+            <a href="#" class="close" aria-expanded="true">
+              <strong class="ms-1">Close all</strong>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="ntg-accordion-container">
+        <section class="accordion ntg-accordion" data-accordion-id="${accordionId}">
+    `;
 
     // Distribution section with map
     let distributionMapHtml = "";
@@ -423,28 +525,33 @@ class ThreatenedSpeciesFactsheet {
         </div>
       `;
     }
-    html += renderSection(
+    html += renderAccordionItem(
       "Distribution",
       data.distribution,
       "distribution",
       distributionMapHtml
     );
-    html += renderSection(
-      "Ecology and Life History",
+    html += renderAccordionItem(
+      "Ecology and life history",
       data.ecology_and_life_history,
       "ecology"
     );
-    html += renderSection(
-      "Threatening Processes",
+    html += renderAccordionItem(
+      "Threatening processes",
       data.threatening_processes,
       "threats"
     );
-    html += renderSection(
-      "Conservation Objectives and Management",
+    html += renderAccordionItem(
+      "Conservation objectives and management",
       data.conservation_objectives_and_management,
       "conservation"
     );
-    html += renderSection("References", data.references, "references");
+    html += renderAccordionItem("References", data.references, "references");
+
+    html += `
+        </section>
+      </div>
+    `;
     html += `</div>`;
 
     html += `</div>`;
