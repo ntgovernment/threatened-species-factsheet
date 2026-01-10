@@ -301,9 +301,46 @@ class ThreatenedSpeciesFactsheet {
     const getStatusBadge = (status, label) => {
       if (!status) return "";
       const statusClass = status.toLowerCase().replace(/\s+/g, "-");
-      return `<span class="status-badge status-${statusClass}">${label}: ${this.escapeHtml(
+
+      // NOT LISTED uses different styling (white background with outline)
+      if (statusClass === "not-listed") {
+        return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-subtle, white); overflow: hidden; outline: 1px var(--clr-stroke-subtle, #D4D4D2) solid; outline-offset: -1px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
+          <div style="color: var(--clr-text-body, #3B3B3A); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
+          status
+        )}</div>
+        </div>`;
+      }
+
+      // ENDANGERED uses different styling (white text on dark background)
+      if (statusClass === "endangered") {
+        return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-7, #D2430F); overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
+          <div style="color: var(--clr-text-inverse, white); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
+          status
+        )}</div>
+        </div>`;
+      }
+
+      // CRITICALLY ENDANGERED uses different styling (white text on dark pink background)
+      if (statusClass === "critically-endangered") {
+        return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-8, #E8114B); overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
+          <div style="color: var(--clr-text-inverse, white); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
+          status
+        )}</div>
+        </div>`;
+      }
+
+      // Define colors for other statuses (VULNERABLE only)
+      const statusColors = {
+        vulnerable: "#FCB414",
+      };
+
+      const bgColor = statusColors[statusClass] || "#6C757D";
+
+      return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: ${bgColor}; overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
+        <div style="color: #3B3B3A; font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
         status
-      )}</span>`;
+      )}</div>
+      </div>`;
     };
 
     // Build HTML sections
@@ -332,18 +369,29 @@ class ThreatenedSpeciesFactsheet {
           ${figcaptionHtml}
         </figure>
       `;
-      html += `<div class="factsheet-meta">`;
-      if (data.common_name) {
-        html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
-          data.common_name
-        )}</p>`;
+
+      // Only show metadata callout if there's data
+      if (data.common_name || data.family_name) {
+        html += `
+      <section>
+        <div class="ntg-callout my-3">
+          <div class="ntg-callout__content">
+            <div class="factsheet-meta">`;
+        if (data.common_name) {
+          html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
+            data.common_name
+          )}</p>`;
+        }
+        if (data.family_name) {
+          html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
+            data.family_name
+          )}</p>`;
+        }
+        html += `</div>
+          </div>
+        </div>
+      </section>`;
       }
-      if (data.family_name) {
-        html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
-          data.family_name
-        )}</p>`;
-      }
-      html += `</div>`;
     }
 
     // Conservation status badges

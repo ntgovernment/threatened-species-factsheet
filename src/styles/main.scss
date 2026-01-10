@@ -52,51 +52,28 @@ $spacing-unit: 1rem;
   }
 }
 
-// Conservation status badges - Bootstrap-style
+// Conservation status badges - inline styled
 .conservation-status {
   display: flex;
   flex-wrap: wrap;
   gap: calc($spacing-unit / 2);
   margin: $spacing-unit 0 $spacing-unit * 1.5 0;
-
-  .status-badge {
-    display: inline-block;
-    padding: 0.35rem 0.65rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #fff;
-    text-transform: capitalize;
-
-    &.status-vulnerable {
-      background-color: #28a745;
-    }
-
-    &.status-endangered {
-      background-color: #dc3545;
-    }
-
-    &.status-critically-endangered {
-      background-color: #bd2130;
-    }
-
-    &.status-not-listed {
-      background-color: #6c757d;
-    }
-  }
 }
 
-// Meta information - subtle integration
-.factsheet-meta {
-  margin: $spacing-unit 0 $spacing-unit * 1.5 0;
-  padding-left: $spacing-unit;
-  border-left: 3px solid $secondary-color;
+// Meta information - inside ntg-callout
+.ntg-callout {
+  .ntg-callout__content {
+    padding: 16px;
+    border-left-width: 6px;
+  }
 
-  p {
-    margin: 0.5rem 0;
+  .factsheet-meta {
+    p {
+      margin: 0.5rem 0;
 
-    strong {
-      font-weight: 600;
+      strong {
+        font-weight: 600;
+      }
     }
   }
 }
