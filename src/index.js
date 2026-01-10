@@ -365,7 +365,7 @@ class ThreatenedSpeciesFactsheet {
     let distributionMapHtml = "";
     if (data.map_image_name && data.scientific_name) {
       const imageFilename = getImageFilename(data.scientific_name);
-      const mapUrl = `https://nt.gov.au/environment/native-plants/threatened-plants/maps/${imageFilename}.jpg`;
+      const mapUrl = `https://nt.gov.au/environment/dev/threatened-species/maps/${imageFilename}.webp`;
       distributionMapHtml = `
         <div class="distribution-map">
           <img src="${mapUrl}" 

@@ -105,7 +105,8 @@ $spacing-unit: 1rem;
   margin: $spacing-unit * 2 0;
 
   img {
-    max-width: 100%;
+    max-width: 600px;
+    width: 100%;
     height: auto;
     border: 1px solid $border-color;
     border-radius: 0.25rem;
