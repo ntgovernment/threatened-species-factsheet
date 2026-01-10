@@ -272,14 +272,27 @@ class ThreatenedSpeciesFactsheet {
       data.scientific_name || "Unknown Species"
     );
 
+    // Helper function to generate image-friendly filename from scientific name
+    const getImageFilename = (scientificName) => {
+      if (!scientificName) return "";
+      // Replace spaces with hyphens for image filenames
+      return scientificName.replace(/\s+/g, "-");
+    };
+
     // Helper function to render sections only if content exists
-    const renderSection = (title, content, htmlClass = "") => {
+    const renderSection = (
+      title,
+      content,
+      htmlClass = "",
+      prependContent = ""
+    ) => {
       if (!content) return "";
       const renderedContent = this.renderContent(content, this.allowHtml);
       return `
         <div class="factsheet-section ${htmlClass}">
-          <h2>${this.escapeHtml(title)}</h2>
-          <div class="section-content">${renderedContent}</div>
+          <h2>${this.escapeHtml(
+            title
+          )}</h2>          ${prependContent}          <div class="section-content">${renderedContent}</div>
         </div>
       `;
     };
@@ -296,8 +309,29 @@ class ThreatenedSpeciesFactsheet {
     // Build HTML sections
     let html = `<div class="factsheet-container">`;
 
-    // Common name and family
-    if (data.common_name || data.family_name) {
+    // Species image (before metadata)
+    if (data.scientific_name) {
+      const imageFilename = getImageFilename(data.scientific_name);
+      const imageUrl = `https://nt.gov.au/environment/dev/threatened-species/images/${imageFilename}.webp`;
+
+      // Image credit (if available)
+      let figcaptionHtml = "";
+      if (data.image_credit) {
+        // Remove all HTML tags and escape HTML
+        const creditText = data.image_credit.replace(/<[^>]*>/g, "").trim();
+        const escapedCredit = this.escapeHtml(creditText);
+        figcaptionHtml = `<figcaption>Photo credits: ${escapedCredit}</figcaption>`;
+      }
+
+      html += `
+        <figure class="species-image">
+          <img src="${imageUrl}" 
+               alt="${escapedScientificName}" 
+               onerror="this.parentElement.style.display='none'"
+               loading="lazy">
+          ${figcaptionHtml}
+        </figure>
+      `;
       html += `<div class="factsheet-meta">`;
       if (data.common_name) {
         html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
@@ -323,25 +357,30 @@ class ThreatenedSpeciesFactsheet {
       html += `</div>`;
     }
 
-    // Distribution map
-    if (data.map_image_name) {
-      const mapUrl = `https://nt.gov.au/environment/native-plants/threatened-plants/maps/${encodeURIComponent(
-        data.map_image_name
-      )}`;
-      html += `
+    // Content sections
+    html += `<div class="factsheet-content">`;
+    html += renderSection("Description", data.description, "description");
+
+    // Distribution section with map
+    let distributionMapHtml = "";
+    if (data.map_image_name && data.scientific_name) {
+      const imageFilename = getImageFilename(data.scientific_name);
+      const mapUrl = `https://nt.gov.au/environment/native-plants/threatened-plants/maps/${imageFilename}.jpg`;
+      distributionMapHtml = `
         <div class="distribution-map">
           <img src="${mapUrl}" 
                alt="Distribution map for ${escapedScientificName}" 
-               onerror="this.style.display='none'"
+               onerror="this.parentElement.style.display='none'"
                loading="lazy">
         </div>
       `;
     }
-
-    // Content sections
-    html += `<div class="factsheet-content">`;
-    html += renderSection("Description", data.description, "description");
-    html += renderSection("Distribution", data.distribution, "distribution");
+    html += renderSection(
+      "Distribution",
+      data.distribution,
+      "distribution",
+      distributionMapHtml
+    );
     html += renderSection(
       "Ecology and Life History",
       data.ecology_and_life_history,

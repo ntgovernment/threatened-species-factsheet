@@ -38,6 +38,19 @@ $spacing-unit: 1rem;
   }
 }
 
+// Species image - displayed before metadata
+.species-image {
+  margin: 0 0 $spacing-unit * 1.5 0;
+
+  img {
+    max-width: 400px;
+    width: 100%;
+    height: auto;
+    border: 1px solid $border-color;
+    border-radius: 0.25rem;
+  }
+}
+
 // Conservation status badges - Bootstrap-style
 .conservation-status {
   display: flex;
