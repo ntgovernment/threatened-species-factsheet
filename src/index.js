@@ -119,7 +119,7 @@ class ThreatenedSpeciesFactsheet {
     let navHTML = `
       <section class="ntg-sidenav">
         <div class="ntg-sidenav__title">
-          <a href="example.html">Threatened plant species</a>
+          <a href="?">Threatened plant species</a>
         </div>
         <ul class="list-group list-group-flush pt-0">
     `;
@@ -134,7 +134,7 @@ class ThreatenedSpeciesFactsheet {
 
       navHTML += `
           <li class="list-group-item${activeClass}">
-            <a href="example.html?species=${encodedName}" title="${this.escapeHtml(
+            <a href="?species=${encodedName}" title="${this.escapeHtml(
         scientificName
       )}">
               <em>${this.escapeHtml(scientificName)}</em>

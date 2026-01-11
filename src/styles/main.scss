@@ -213,11 +213,16 @@ $spacing-unit: 1rem;
   .distribution-map {
     display: block !important;
     page-break-inside: avoid;
+    text-align: left;
 
     img {
       display: block !important;
       max-width: 100%;
       height: auto;
+      object-fit: contain;
+      aspect-ratio: attr(width) / attr(height);
+      border: none !important;
+      margin-left: 0;
     }
   }
 
