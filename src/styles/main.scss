@@ -182,3 +182,83 @@ $spacing-unit: 1rem;
     margin: $spacing-unit * 1.5 0;
   }
 }
+
+// Print styles - ensure images are visible when printing/saving as PDF
+@media print {
+  // Page setup with repeating header from H1
+  @page {
+    margin-top: 2.5cm;
+    margin-bottom: 2cm;
+    margin-left: 1.5cm;
+    margin-right: 1.5cm;
+
+    @top-center {
+      content: element(pageHeader);
+      font-size: 11pt;
+      font-family: "Lato", sans-serif;
+      color: #000000;
+      text-align: right;
+      border-bottom: 1pt solid #000000;
+      padding-bottom: 6pt;
+    }
+  }
+
+  // Make H1 available as a running header for all pages
+  h1 {
+    position: running(pageHeader);
+    color: #000000 !important;
+  }
+
+  .species-image,
+  .distribution-map {
+    display: block !important;
+    page-break-inside: avoid;
+
+    img {
+      display: block !important;
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  // Ensure figures are visible
+  figure {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+
+  // Optimize conservation status badges for print
+  .conservation-status {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 1.5rem 0;
+  }
+
+  // Ensure callout is visible in print
+  .ntg-callout {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+
+  // Prevent accordion content from breaking across pages
+  .accordion-item {
+    page-break-inside: avoid;
+  }
+
+  // Hide Open all/Close all accordion toggle links
+  .accordion-toggler,
+  .ntg-accordion-toggler {
+    display: none !important;
+  }
+
+  // NT Government template color scheme for print
+  h2 {
+    color: #f4551a !important;
+  }
+
+  h3,
+  .accordion-button {
+    color: #008387 !important;
+  }
+}
