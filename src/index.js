@@ -430,7 +430,7 @@ class ThreatenedSpeciesFactsheet {
     // Species image (before metadata)
     if (data.scientific_name) {
       const imageFilename = getImageFilename(data.scientific_name);
-      const imageUrl = `https://nt.gov.au/environment/dev/threatened-species-folder/images/${imageFilename}.webp`;
+      const imageUrl = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
 
       // Image credit (if available)
       let figcaptionHtml = "";
@@ -515,7 +515,7 @@ class ThreatenedSpeciesFactsheet {
     let distributionMapHtml = "";
     if (data.map_image_name && data.scientific_name) {
       const imageFilename = getImageFilename(data.scientific_name);
-      const mapUrl = `https://nt.gov.au/environment/dev/threatened-species-folder/maps/${imageFilename}.webp`;
+      const mapUrl = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${imageFilename}.webp`;
       distributionMapHtml = `
         <div class="distribution-map">
           <img src="${mapUrl}" 
