@@ -152,13 +152,22 @@ class ThreatenedSpeciesFactsheet {
   }
 
   /**
-   * Update page metadata with species name
-   * @param {string} scientificName - Scientific name of the species
+   * Update page metadata with display name
+   * @param {string} displayName - Display name of the species
+   * @param {boolean} isScientificName - Whether the display name is scientific
+   * @param {string|null} scientificName - Scientific name to show as subtitle (if H1 is common name)
    */
-  updatePageMetadata(scientificName) {
-    if (!scientificName) return;
+  updatePageMetadata(
+    displayName,
+    isScientificName = false,
+    scientificName = null,
+  ) {
+    if (!displayName) return;
 
-    const escapedName = this.escapeHtml(scientificName);
+    const escapedName = this.escapeHtml(displayName);
+    const formattedName = isScientificName
+      ? `<em>${escapedName}</em>`
+      : escapedName;
 
     // Update document title
     document.title = `${escapedName} - Factsheet | NT.GOV.AU`;
@@ -166,13 +175,26 @@ class ThreatenedSpeciesFactsheet {
     // Update h1 heading
     const h1 = document.querySelector("h1");
     if (h1) {
-      h1.innerHTML = `<em>${escapedName}</em>`;
+      h1.innerHTML = formattedName;
+
+      // Add scientific name subtitle if H1 shows common name
+      let subtitle = h1.nextElementSibling;
+      if (subtitle && subtitle.classList.contains("factsheet-subtitle")) {
+        subtitle.remove();
+      }
+
+      if (!isScientificName && scientificName) {
+        subtitle = document.createElement("p");
+        subtitle.className = "factsheet-subtitle";
+        subtitle.innerHTML = `<em>${this.escapeHtml(scientificName)}</em>`;
+        h1.parentNode.insertBefore(subtitle, h1.nextSibling);
+      }
     }
 
     // Update breadcrumb active item
     const breadcrumbActive = document.querySelector(".breadcrumb-item.active");
     if (breadcrumbActive) {
-      breadcrumbActive.innerHTML = `<em>${escapedName}</em>`;
+      breadcrumbActive.innerHTML = formattedName;
     }
   }
 
@@ -378,54 +400,68 @@ class ThreatenedSpeciesFactsheet {
       `;
     };
 
-    // Conservation status badge helper
-    const getStatusBadge = (status, label) => {
+    // Conservation status text helper
+    const getStatusText = (status, label, jurisdiction, act) => {
       if (!status) return "";
       const statusClass = status.toLowerCase().replace(/\s+/g, "-");
 
-      // NOT LISTED uses different styling (white background with outline)
-      if (statusClass === "not-listed") {
-        return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-subtle, white); overflow: hidden; outline: 1px var(--clr-stroke-subtle, #D4D4D2) solid; outline-offset: -1px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-          <div style="color: var(--clr-text-body, #3B3B3A); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-            status,
-          )}</div>
-        </div>`;
-      }
-
-      // ENDANGERED uses different styling (white text on dark background)
-      if (statusClass === "endangered") {
-        return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-7, #D2430F); overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-          <div style="color: var(--clr-text-inverse, white); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-            status,
-          )}</div>
-        </div>`;
-      }
-
-      // CRITICALLY ENDANGERED uses different styling (white text on dark pink background)
-      if (statusClass === "critically-endangered") {
-        return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-8, #E8114B); overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-          <div style="color: var(--clr-text-inverse, white); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-            status,
-          )}</div>
-        </div>`;
-      }
-
-      // Define colors for other statuses (VULNERABLE only)
-      const statusColors = {
-        vulnerable: "#FCB414",
+      const severityLevels = {
+        "critically-endangered": "critical",
+        endangered: "high",
+        vulnerable: "medium",
+        "not-listed": "none",
       };
 
-      const bgColor = statusColors[statusClass] || "#6C757D";
+      const severity = severityLevels[statusClass] || "unknown";
 
-      return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: ${bgColor}; overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-        <div style="color: #3B3B3A; font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-          status,
-        )}</div>
-      </div>`;
+      return `
+        <div role="status" 
+             aria-label="${jurisdiction} conservation status: ${this.escapeHtml(status)}"
+             data-severity="${severity}"
+             class="conservation-status-item">
+          <div>
+            <div class="status-line">
+              <span class="status-text">${label}: ${this.escapeHtml(status)}</span>
+            </div>
+            <div class="status-act"><em>${this.escapeHtml(act)}</em></div>
+          </div>
+        </div>
+      `;
     };
 
     // Build HTML sections
     let html = `<div class="factsheet-container">`;
+
+    // Conservation status section (placed at top, under subtitle)
+    if (data.conservation_status_nt || data.conservation_status_australia) {
+      html += `
+        <section class="conservation-status-section" aria-labelledby="status-heading">
+          <h2 id="status-heading">Conservation status</h2>
+          <div class="conservation-status">
+      `;
+      // Australia listed first (as per design)
+      if (data.conservation_status_australia) {
+        html += getStatusText(
+          data.conservation_status_australia,
+          "Australia",
+          "Australia",
+          "Environment Protection and Biodiversity Conservation Act 1999",
+        );
+      }
+      // Northern Territory listed second
+      if (data.conservation_status_nt) {
+        html += getStatusText(
+          data.conservation_status_nt,
+          "Northern Territory",
+          "Northern Territory",
+          "Territory Parks and Wildlife Conservation Act 1976",
+        );
+      }
+      html += `
+          </div>
+        </section>
+      `;
+    }
 
     // Species image (before metadata)
     if (data.scientific_name) {
@@ -473,17 +509,6 @@ class ThreatenedSpeciesFactsheet {
         </div>
       </section>`;
       }
-    }
-
-    // Conservation status badges
-    if (data.conservation_status_nt || data.conservation_status_australia) {
-      html += `<div class="conservation-status">`;
-      html += getStatusBadge(data.conservation_status_nt, "NT Status");
-      html += getStatusBadge(
-        data.conservation_status_australia,
-        "Australian Status",
-      );
-      html += `</div>`;
     }
 
     // Content sections
@@ -564,8 +589,15 @@ class ThreatenedSpeciesFactsheet {
     this.render();
 
     // Update page metadata
-    if (data && data.scientific_name) {
-      this.updatePageMetadata(data.scientific_name);
+    if (data) {
+      const commonName = (data.common_name || "").trim();
+      const displayName = commonName || data.scientific_name;
+      const isScientificName = !commonName && !!data.scientific_name;
+      this.updatePageMetadata(
+        displayName,
+        isScientificName,
+        data.scientific_name,
+      );
     }
   }
 }

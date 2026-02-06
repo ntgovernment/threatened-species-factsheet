@@ -38,6 +38,16 @@ $spacing-unit: 1rem;
   }
 }
 
+// Scientific name subtitle (displayed under H1 when common name is used)
+.factsheet-subtitle {
+  margin-top: -0.5rem;
+  margin-bottom: $spacing-unit * 1.5;
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
 // Species image - displayed before metadata
 .species-image {
   margin: 0 0 $spacing-unit * 1.5 0;
@@ -52,12 +62,43 @@ $spacing-unit: 1rem;
   }
 }
 
-// Conservation status badges - inline styled
-.conservation-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: calc($spacing-unit / 2);
-  margin: $spacing-unit 0 $spacing-unit * 1.5 0;
+// Conservation status section (text-based with heading)
+.conservation-status-section {
+  margin-bottom: $spacing-unit * 1.5;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: $spacing-unit * 0.75;
+  }
+
+  .conservation-status {
+    display: flex;
+    flex-direction: column;
+    gap: calc($spacing-unit / 2);
+  }
+
+  .conservation-status-item {
+    margin-bottom: $spacing-unit;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .status-line {
+    margin-bottom: 0.25rem;
+  }
+
+  .status-text {
+    font-size: 1rem;
+  }
+
+  .status-act {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
 }
 
 // Meta information - inside ntg-callout
@@ -172,12 +213,6 @@ $spacing-unit: 1rem;
 
 // Responsive styles
 @media (max-width: 768px) {
-  .conservation-status {
-    .status-badge {
-      font-size: 0.8125rem;
-    }
-  }
-
   .distribution-map {
     margin: $spacing-unit * 1.5 0;
   }
@@ -232,12 +267,11 @@ $spacing-unit: 1rem;
     page-break-inside: avoid;
   }
 
-  // Optimize conservation status badges for print
-  .conservation-status {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1rem 0 1.5rem 0;
+  // Ensure conservation status section prints correctly
+  .conservation-status-section {
+    display: block !important;
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem;
   }
 
   // Ensure callout is visible in print
