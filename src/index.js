@@ -19,7 +19,7 @@ class ThreatenedSpeciesFactsheet {
 
     this.apiUrl = isLocalhost
       ? "/get-threatened-plant-species.json"
-      : "https://nt.gov.au/environment/dev/threatened-species/get-threatened-plant-species";
+      : "https://nt.gov.au/environment/dev/threatened-species-folder/configuration/api/get-data-from-flora-and-fauna-atlas-database";
 
     if (this.element) {
       this.init();
@@ -63,7 +63,7 @@ class ThreatenedSpeciesFactsheet {
       const foundSpecies = data.find(
         (species) =>
           species.scientific_name &&
-          species.scientific_name.toLowerCase() === speciesLower
+          species.scientific_name.toLowerCase() === speciesLower,
       );
 
       return foundSpecies || null;
@@ -135,8 +135,8 @@ class ThreatenedSpeciesFactsheet {
       navHTML += `
           <li class="list-group-item${activeClass}">
             <a href="?species=${encodedName}" title="${this.escapeHtml(
-        scientificName
-      )}">
+              scientificName,
+            )}">
               <em>${this.escapeHtml(scientificName)}</em>
             </a>
           </li>
@@ -251,7 +251,7 @@ class ThreatenedSpeciesFactsheet {
       <div class="factsheet-not-found">
         <h3>Species Not Found</h3>
         <p>The species "${this.escapeHtml(
-          scientificName
+          scientificName,
         )}" was not found in the database.</p>
         <p>Please check the species name and try again.</p>
       </div>
@@ -276,7 +276,7 @@ class ThreatenedSpeciesFactsheet {
     accordionTogglers.forEach((toggler) => {
       const accordionId = toggler.id.replace("accordionToggle-", "");
       const accordion = document.querySelector(
-        `[data-accordion-id="${accordionId}"]`
+        `[data-accordion-id="${accordionId}"]`,
       );
 
       if (!accordion) return;
@@ -314,7 +314,7 @@ class ThreatenedSpeciesFactsheet {
 
   generateFactsheetHTML(data) {
     const escapedScientificName = this.escapeHtml(
-      data.scientific_name || "Unknown Species"
+      data.scientific_name || "Unknown Species",
     );
 
     // Helper function to generate image-friendly filename from scientific name
@@ -329,14 +329,14 @@ class ThreatenedSpeciesFactsheet {
       title,
       content,
       htmlClass = "",
-      prependContent = ""
+      prependContent = "",
     ) => {
       if (!content) return "";
       const renderedContent = this.renderContent(content, this.allowHtml);
       return `
         <div class="factsheet-section ${htmlClass}">
           <h2>${this.escapeHtml(
-            title
+            title,
           )}</h2>          ${prependContent}          <div class="section-content">${renderedContent}</div>
         </div>
       `;
@@ -346,7 +346,7 @@ class ThreatenedSpeciesFactsheet {
     const renderSectionWithoutHeading = (
       content,
       htmlClass = "",
-      prependContent = ""
+      prependContent = "",
     ) => {
       if (!content) return "";
       const renderedContent = this.renderContent(content, this.allowHtml);
@@ -387,8 +387,8 @@ class ThreatenedSpeciesFactsheet {
       if (statusClass === "not-listed") {
         return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-subtle, white); overflow: hidden; outline: 1px var(--clr-stroke-subtle, #D4D4D2) solid; outline-offset: -1px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
           <div style="color: var(--clr-text-body, #3B3B3A); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-          status
-        )}</div>
+            status,
+          )}</div>
         </div>`;
       }
 
@@ -396,8 +396,8 @@ class ThreatenedSpeciesFactsheet {
       if (statusClass === "endangered") {
         return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-7, #D2430F); overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
           <div style="color: var(--clr-text-inverse, white); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-          status
-        )}</div>
+            status,
+          )}</div>
         </div>`;
       }
 
@@ -405,8 +405,8 @@ class ThreatenedSpeciesFactsheet {
       if (statusClass === "critically-endangered") {
         return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--clr-tag-tag-8, #E8114B); overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
           <div style="color: var(--clr-text-inverse, white); font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-          status
-        )}</div>
+            status,
+          )}</div>
         </div>`;
       }
 
@@ -419,8 +419,8 @@ class ThreatenedSpeciesFactsheet {
 
       return `<div style="float: left; height: 100%; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: ${bgColor}; overflow: hidden; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
         <div style="color: #3B3B3A; font-size: 12px; font-family: Lato; font-weight: 700; text-transform: uppercase; line-height: 16px; letter-spacing: 2px; word-wrap: break-word">${label}: ${this.escapeHtml(
-        status
-      )}</div>
+          status,
+        )}</div>
       </div>`;
     };
 
@@ -430,7 +430,7 @@ class ThreatenedSpeciesFactsheet {
     // Species image (before metadata)
     if (data.scientific_name) {
       const imageFilename = getImageFilename(data.scientific_name);
-      const imageUrl = `https://nt.gov.au/environment/dev/threatened-species/images/${imageFilename}.webp`;
+      const imageUrl = `https://nt.gov.au/environment/dev/threatened-species-folder/images/${imageFilename}.webp`;
 
       // Image credit (if available)
       let figcaptionHtml = "";
@@ -460,12 +460,12 @@ class ThreatenedSpeciesFactsheet {
             <div class="factsheet-meta">`;
         if (data.common_name) {
           html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
-            data.common_name
+            data.common_name,
           )}</p>`;
         }
         if (data.family_name) {
           html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
-            data.family_name
+            data.family_name,
           )}</p>`;
         }
         html += `</div>
@@ -481,7 +481,7 @@ class ThreatenedSpeciesFactsheet {
       html += getStatusBadge(data.conservation_status_nt, "NT Status");
       html += getStatusBadge(
         data.conservation_status_australia,
-        "Australian Status"
+        "Australian Status",
       );
       html += `</div>`;
     }
@@ -515,7 +515,7 @@ class ThreatenedSpeciesFactsheet {
     let distributionMapHtml = "";
     if (data.map_image_name && data.scientific_name) {
       const imageFilename = getImageFilename(data.scientific_name);
-      const mapUrl = `https://nt.gov.au/environment/dev/threatened-species/maps/${imageFilename}.webp`;
+      const mapUrl = `https://nt.gov.au/environment/dev/threatened-species-folder/maps/${imageFilename}.webp`;
       distributionMapHtml = `
         <div class="distribution-map">
           <img src="${mapUrl}" 
@@ -529,22 +529,22 @@ class ThreatenedSpeciesFactsheet {
       "Distribution",
       data.distribution,
       "distribution",
-      distributionMapHtml
+      distributionMapHtml,
     );
     html += renderAccordionItem(
       "Ecology and life history",
       data.ecology_and_life_history,
-      "ecology"
+      "ecology",
     );
     html += renderAccordionItem(
       "Threatening processes",
       data.threatening_processes,
-      "threats"
+      "threats",
     );
     html += renderAccordionItem(
       "Conservation objectives and management",
       data.conservation_objectives_and_management,
-      "conservation"
+      "conservation",
     );
     html += renderAccordionItem("References", data.references, "references");
 
@@ -605,7 +605,7 @@ if (typeof window !== "undefined") {
       } catch (error) {
         console.error("Failed to load species data:", error);
         factsheet.showError(
-          "Failed to load species data. Please check your internet connection and try again."
+          "Failed to load species data. Please check your internet connection and try again.",
         );
       }
     }
