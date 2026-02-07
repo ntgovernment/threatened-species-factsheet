@@ -1,6 +1,10 @@
 // Import styles
 import "./styles/main.scss";
 
+// Import PDF generation libraries
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+
 /**
  * Threatened Species Factsheet
  * Main entry point for the threatened species factsheet component
@@ -10,6 +14,9 @@ class ThreatenedSpeciesFactsheet {
     this.element = options.element || null;
     this.data = options.data || null;
     this.allowHtml = options.allowHtml || false;
+    this.currentPage = 1;
+    this.totalPages = 0;
+    this.isGeneratingPDF = false;
 
     // Use local JSON file for localhost, API for production
     const isLocalhost =
@@ -373,6 +380,864 @@ class ThreatenedSpeciesFactsheet {
       this.element.innerHTML = this.generateFactsheetHTML(this.data);
       // Initialize accordion toggle functionality
       this.initAccordionToggles();
+      // Initialize print modal button
+      this.initPrintButton();
+    }
+  }
+
+  /**
+   * Initialize print button event listener
+   */
+  initPrintButton() {
+    const printButton = document.getElementById("openPrintModal");
+    if (printButton) {
+      printButton.addEventListener("click", () => {
+        this.openPrintModal();
+      });
+    }
+  }
+
+  /**
+   * Open print preview modal
+   */
+  openPrintModal() {
+    // Check if modal already exists
+    let modalElement = document.getElementById("factsheet-print-modal");
+
+    if (!modalElement) {
+      // Create modal and append to body
+      const modalHTML = this.generateModalHTML();
+      document.body.insertAdjacentHTML("beforeend", modalHTML);
+      modalElement = document.getElementById("factsheet-print-modal");
+    }
+
+    // Populate modal content with printable HTML
+    const modalBody = modalElement.querySelector(".modal-body");
+    if (modalBody && this.data) {
+      modalBody.innerHTML = this.generatePrintableHTML(this.data);
+    }
+
+    // Initialize pagination
+    this.initializePagination(modalElement);
+
+    // Initialize and show Bootstrap modal
+    if (typeof window.bootstrap !== "undefined" && window.bootstrap.Modal) {
+      const modal = new window.bootstrap.Modal(modalElement);
+      modal.show();
+
+      // Add PDF download button event listener
+      const modalPDFBtn = modalElement.querySelector("#modalPDFButton");
+      if (modalPDFBtn) {
+        modalPDFBtn.onclick = () => {
+          this.generatePDF();
+        };
+      }
+
+      // Add pagination button event listeners
+      const prevBtn = modalElement.querySelector("#prevPageBtn");
+      const nextBtn = modalElement.querySelector("#nextPageBtn");
+
+      if (prevBtn) {
+        prevBtn.onclick = () => this.previousPage();
+      }
+      if (nextBtn) {
+        nextBtn.onclick = () => this.nextPage();
+      }
+    } else {
+      console.error("Bootstrap Modal not available");
+    }
+  }
+
+  /**
+   * Generate Bootstrap modal HTML structure
+   * @returns {string} Modal HTML
+   */
+  generateModalHTML() {
+    const commonName = (this.data?.common_name || "").trim();
+    const displayName =
+      commonName || this.data?.scientific_name || "Species Factsheet";
+    const escapedName = this.escapeHtml(displayName);
+
+    return `
+      <div class="modal fade" id="factsheet-print-modal" tabindex="-1" aria-labelledby="factsheetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="factsheetModalLabel">PDF Preview: ${escapedName}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body print-preview">
+              <!-- Content will be inserted here -->
+            </div>
+            <div class="modal-footer d-print-none">
+              <div class="pagination-controls me-auto">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="prevPageBtn" disabled>
+                  <svg width="12" height="12" fill="currentColor" style="vertical-align: baseline;">
+                    <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                  </svg>
+                  Previous
+                </button>
+                <span class="page-indicator mx-3" id="pageIndicator">Page 1 of 1</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="nextPageBtn" disabled>
+                  Next
+                  <svg width="12" height="12" fill="currentColor" style="vertical-align: baseline;">
+                    <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="modalPDFButton">
+                  <svg width="16" height="16" fill="currentColor" class="me-2" style="vertical-align: text-bottom;">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                  </svg>
+                  <span id="pdfButtonText">Download PDF</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate printable HTML (flattened, no accordions) for modal
+   * @param {Object} data - Species data
+   * @returns {string} Printable HTML
+   */
+  generatePrintableHTML(data) {
+    const commonName = (data.common_name || "").trim();
+    const displayName = commonName || data.scientific_name;
+    const isScientificName = !commonName && !!data.scientific_name;
+    const escapedName = this.escapeHtml(displayName);
+    const formattedName = isScientificName
+      ? `<em>${escapedName}</em>`
+      : escapedName;
+
+    // Helper function to render sections with H1 headings (promoted from H2)
+    const renderSection = (title, content, prependContent = "") => {
+      if (!content) return "";
+      const renderedContent = this.renderContent(content, this.allowHtml);
+      return `
+        <section class="print-section">
+          <h1>${this.escapeHtml(title)}</h1>
+          <div class="section-content">${prependContent}${renderedContent}</div>
+        </section>
+      `;
+    };
+
+    // Helper to render sidebar image
+    const renderSidebarImage = () => {
+      if (!data.scientific_name) return "";
+
+      const altText = this.escapeHtml(commonName || data.scientific_name);
+      const imageFilename = data.scientific_name.replace(/\s+/g, "-");
+      const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
+
+      let figcaptionText = "";
+      if (commonName) {
+        figcaptionText = this.escapeHtml(commonName);
+      }
+      if (data.image_credit) {
+        const creditText = data.image_credit.replace(/<[^>]*>/g, "").trim();
+        const escapedCredit = this.escapeHtml(creditText);
+        const separator = figcaptionText ? ". " : "";
+        figcaptionText += `${separator}Photo credit: ${escapedCredit}`;
+      }
+
+      return `
+        <figure class="sidebar-image mb-3">
+          <img src="${imagePath}" 
+               alt="${altText}" 
+               class="img-fluid"
+               style="max-width: 100%; height: auto;"
+               onerror="this.parentElement.style.display='none'" />
+          ${figcaptionText ? `<figcaption class="small mt-2">${figcaptionText}</figcaption>` : ""}
+        </figure>
+      `;
+    };
+
+    // Helper to render sidebar map
+    const renderSidebarMap = () => {
+      if (!data.map_image_name || !data.scientific_name) return "";
+
+      const imageFilename = data.scientific_name.replace(/\s+/g, "-");
+      const mapPath = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${imageFilename}.webp`;
+      const altText = `Distribution map for ${this.escapeHtml(commonName || data.scientific_name)}`;
+      const speciesName = commonName
+        ? this.escapeHtml(commonName)
+        : `<em>${this.escapeHtml(data.scientific_name)}</em>`;
+
+      return `
+        <figure class="sidebar-map mb-3">
+          <img src="${mapPath}" 
+               alt="${altText}" 
+               class="img-fluid"
+               style="max-width: 100%; height: auto;"
+               onerror="this.parentElement.style.display='none'" />
+          <figcaption class="small mt-2">Known locations of ${speciesName} in the NT (<a href="http://nrmaps.nt.gov.au" target="_blank" rel="noopener noreferrer">nrmaps.nt.gov.au</a>)</figcaption>
+        </figure>
+      `;
+    };
+
+    // Helper to render sidebar related info
+    const renderSidebarRelatedInfo = () => {
+      if (!data.related_information) return "";
+
+      const relatedContent = this.renderContent(
+        data.related_information,
+        this.allowHtml,
+      );
+      const processedContent = relatedContent.replace(
+        /<strong>(.*?)<\/strong>/gi,
+        '<h2 class="sidebar-subheading">$1</h2>',
+      );
+
+      return `
+        <div class="sidebar-related-info mb-3">
+          <h2 class="sidebar-heading">Related information</h2>
+          <div class="sidebar-content small">${processedContent}</div>
+        </div>
+      `;
+    };
+
+    // Conservation status helper - simplified format
+    const getStatusText = (status, label, act) => {
+      if (!status) return "";
+      return `<p>${label}: ${this.escapeHtml(status)}<br><em>${this.escapeHtml(act)}</em></p>`;
+    };
+
+    // Build printable HTML with continuous content flow
+    let html = `<div class="printable-factsheet" id="continuous-content">`;
+
+    // First page structure with sidebar - all content will flow through pagination
+    html += `<div class="print-page-first" data-species-title="${this.escapeHtml(formattedName)}">`;
+
+    // Page header with large title
+    html += `<div class="print-page-header">`;
+    html += `<div class="print-title-large">${formattedName}</div>`;
+    if (!isScientificName && data.scientific_name) {
+      html += `<p class="print-subtitle"><em>${this.escapeHtml(data.scientific_name)}</em></p>`;
+    }
+    html += `</div>`;
+
+    // Two-column layout
+    html += `<div class="print-layout">`;
+
+    // Main content column - ALL content sections go here for pagination
+    html += `<div class="print-main-content">`;
+
+    // Conservation status
+    if (data.conservation_status_nt || data.conservation_status_australia) {
+      html += `<section class="print-section conservation-status-section">`;
+      html += `<h1>Conservation status</h1>`;
+      html += `<div class="section-content">`;
+
+      if (data.conservation_status_australia) {
+        html += getStatusText(
+          data.conservation_status_australia,
+          "Australia",
+          "Environment Protection and Biodiversity Conservation Act 1999",
+        );
+      }
+      if (data.conservation_status_nt) {
+        html += getStatusText(
+          data.conservation_status_nt,
+          "Northern Territory",
+          "Territory Parks and Wildlife Conservation Act 1976",
+        );
+      }
+      html += `</div></section>`;
+    }
+
+    // Description with family name
+    const familyNameHtml = data.family_name
+      ? `<p class="family-name">Family: ${this.escapeHtml(data.family_name)}</p>`
+      : "";
+    html += renderSection("Description", data.description, familyNameHtml);
+
+    // All remaining sections as continuous flow
+    html += renderSection("Distribution", data.distribution);
+    html += renderSection(
+      "Ecology and life history",
+      data.ecology_and_life_history,
+    );
+    html += renderSection("Threatening processes", data.threatening_processes);
+    html += renderSection(
+      "Conservation objectives and management",
+      data.conservation_objectives_and_management,
+    );
+    html += renderSection("References", data.references);
+
+    // Close main content column
+    html += `</div>`;
+
+    // Sidebar column (appears on first page only)
+    html += `<aside class="print-sidebar">`;
+    html += renderSidebarImage();
+    html += renderSidebarMap();
+    html += renderSidebarRelatedInfo();
+    html += `</aside>`;
+
+    // Close two-column layout
+    html += `</div>`;
+
+    // Close first page wrapper
+    html += `</div>`;
+
+    html += `</div>`;
+    return html;
+  }
+
+  /**
+   * Initialize pagination for modal preview
+   * @param {HTMLElement} modalElement - Modal DOM element
+   */
+  initializePagination(modalElement) {
+    const continuousContent = modalElement.querySelector("#continuous-content");
+    if (!continuousContent) return;
+
+    // Calculate page breaks based on content height
+    this.calculatePageBreaks(continuousContent);
+
+    const pages = modalElement.querySelectorAll(".page-container");
+    this.totalPages = pages.length;
+    this.currentPage = 1;
+
+    // Show first page, hide others
+    pages.forEach((page, index) => {
+      if (index === 0) {
+        page.style.display = "block";
+      } else {
+        page.style.display = "none";
+      }
+    });
+
+    // Update page indicator
+    this.updatePageIndicator();
+    this.updateNavigationButtons();
+  }
+
+  /**
+   * Calculate page breaks based on character count with word-based breaking
+   * @param {HTMLElement} contentElement - Continuous content element
+   */
+  calculatePageBreaks(contentElement) {
+    // Character limits: 1100 for page 1 (sidebar), 2400 for pages 2+
+    const MAX_CHARS_PAGE_1 = 1100;
+    const MAX_CHARS_OTHER_PAGES = 2400;
+
+    // Get the first page wrapper
+    const topLevelChildren = Array.from(contentElement.children);
+    const pages = [];
+    let pageNumber = 1;
+    let speciesTitle = "";
+
+    topLevelChildren.forEach((topChild) => {
+      if (topChild.classList.contains("print-page-first")) {
+        speciesTitle = topChild.getAttribute("data-species-title") || "";
+
+        // Extract all content from the main content column
+        const mainContent = topChild.querySelector(".print-main-content");
+        if (!mainContent) return;
+
+        const allElements = [];
+        const sections = Array.from(mainContent.children);
+
+        sections.forEach((section) => {
+          const heading = section.querySelector("h1");
+          const content = section.querySelector(".section-content");
+
+          if (heading) {
+            allElements.push({
+              type: "heading",
+              element: heading.cloneNode(true),
+            });
+          }
+
+          if (content) {
+            Array.from(content.children).forEach((child) => {
+              allElements.push({
+                type: "content",
+                element: child.cloneNode(true),
+              });
+            });
+          }
+        });
+
+        // Build pages with word-based breaking
+        let isFirstPage = true;
+        let currentPageContent = document.createElement("div");
+        currentPageContent.className = "page-content-body";
+        let currentCharCount = 0;
+
+        for (let i = 0; i < allElements.length; i++) {
+          const item = allElements[i];
+          const elementText = item.element.textContent || "";
+          const elementCharCount = elementText.length;
+          const maxChars = isFirstPage
+            ? MAX_CHARS_PAGE_1
+            : MAX_CHARS_OTHER_PAGES;
+
+          // Check if element fits in current page
+          if (
+            currentCharCount === 0 ||
+            currentCharCount + elementCharCount <= maxChars
+          ) {
+            // Element fits entirely
+            currentPageContent.appendChild(item.element);
+            currentCharCount += elementCharCount;
+          } else {
+            // Element doesn't fit - try word-based splitting for content elements
+            if (item.type === "content" && currentCharCount > 0) {
+              const remainingChars = maxChars - currentCharCount;
+              const words = elementText.split(/\s+/);
+              let partialText = "";
+              let partialCharCount = 0;
+
+              // Find how many words fit on current page
+              for (let w = 0; w < words.length; w++) {
+                const wordWithSpace = (w > 0 ? " " : "") + words[w];
+                if (partialCharCount + wordWithSpace.length <= remainingChars) {
+                  partialText += wordWithSpace;
+                  partialCharCount += wordWithSpace.length;
+                } else {
+                  break;
+                }
+              }
+
+              // If we can fit at least some words on current page
+              if (partialText.trim()) {
+                const partialElement = item.element.cloneNode(true);
+                partialElement.textContent = partialText;
+                currentPageContent.appendChild(partialElement);
+
+                // Create remaining text for next page
+                const remainingText = elementText
+                  .substring(partialText.length)
+                  .trim();
+                if (remainingText) {
+                  // Save current page
+                  if (isFirstPage) {
+                    // First page: include sidebar
+                    const pageHeader = topChild
+                      .querySelector(".print-page-header")
+                      .cloneNode(true);
+                    const sidebar = topChild
+                      .querySelector(".print-sidebar")
+                      .cloneNode(true);
+                    const layout = document.createElement("div");
+                    layout.className = "print-layout";
+                    layout.appendChild(currentPageContent);
+                    layout.appendChild(sidebar);
+
+                    const pageWrapper = document.createElement("div");
+                    pageWrapper.className = "page-container";
+                    pageWrapper.setAttribute(
+                      "data-page",
+                      pageNumber.toString(),
+                    );
+                    pageWrapper.appendChild(pageHeader);
+                    pageWrapper.appendChild(layout);
+                    pageWrapper.appendChild(this.createPageFooter(pageNumber));
+                    pages.push(pageWrapper);
+                    pageNumber++;
+                    isFirstPage = false;
+                  } else {
+                    pages.push(
+                      this.createPageWithHeaderFooter(
+                        pageNumber,
+                        speciesTitle,
+                        currentPageContent,
+                      ),
+                    );
+                    pageNumber++;
+                  }
+
+                  // Start new page with remaining text
+                  currentPageContent = document.createElement("div");
+                  currentPageContent.className = "page-content-body";
+                  const remainingElement = item.element.cloneNode(true);
+                  remainingElement.textContent = remainingText;
+                  currentPageContent.appendChild(remainingElement);
+                  currentCharCount = remainingText.length;
+                }
+              } else {
+                // Can't fit any words on current page - start new page
+                if (currentPageContent.childNodes.length > 0) {
+                  if (isFirstPage) {
+                    const pageHeader = topChild
+                      .querySelector(".print-page-header")
+                      .cloneNode(true);
+                    const sidebar = topChild
+                      .querySelector(".print-sidebar")
+                      .cloneNode(true);
+                    const layout = document.createElement("div");
+                    layout.className = "print-layout";
+                    layout.appendChild(currentPageContent);
+                    layout.appendChild(sidebar);
+
+                    const pageWrapper = document.createElement("div");
+                    pageWrapper.className = "page-container";
+                    pageWrapper.setAttribute(
+                      "data-page",
+                      pageNumber.toString(),
+                    );
+                    pageWrapper.appendChild(pageHeader);
+                    pageWrapper.appendChild(layout);
+                    pageWrapper.appendChild(this.createPageFooter(pageNumber));
+                    pages.push(pageWrapper);
+                    pageNumber++;
+                    isFirstPage = false;
+                  } else {
+                    pages.push(
+                      this.createPageWithHeaderFooter(
+                        pageNumber,
+                        speciesTitle,
+                        currentPageContent,
+                      ),
+                    );
+                    pageNumber++;
+                  }
+                }
+
+                currentPageContent = document.createElement("div");
+                currentPageContent.className = "page-content-body";
+                currentPageContent.appendChild(item.element);
+                currentCharCount = elementCharCount;
+              }
+            } else {
+              // Heading or first element - start new page
+              if (currentPageContent.childNodes.length > 0) {
+                if (isFirstPage) {
+                  const pageHeader = topChild
+                    .querySelector(".print-page-header")
+                    .cloneNode(true);
+                  const sidebar = topChild
+                    .querySelector(".print-sidebar")
+                    .cloneNode(true);
+                  const layout = document.createElement("div");
+                  layout.className = "print-layout";
+                  layout.appendChild(currentPageContent);
+                  layout.appendChild(sidebar);
+
+                  const pageWrapper = document.createElement("div");
+                  pageWrapper.className = "page-container";
+                  pageWrapper.setAttribute("data-page", pageNumber.toString());
+                  pageWrapper.appendChild(pageHeader);
+                  pageWrapper.appendChild(layout);
+                  pageWrapper.appendChild(this.createPageFooter(pageNumber));
+                  pages.push(pageWrapper);
+                  pageNumber++;
+                  isFirstPage = false;
+                } else {
+                  pages.push(
+                    this.createPageWithHeaderFooter(
+                      pageNumber,
+                      speciesTitle,
+                      currentPageContent,
+                    ),
+                  );
+                  pageNumber++;
+                }
+              }
+
+              currentPageContent = document.createElement("div");
+              currentPageContent.className = "page-content-body";
+              currentPageContent.appendChild(item.element);
+              currentCharCount = elementCharCount;
+            }
+          }
+        }
+
+        // Add last page if it has content
+        if (currentPageContent.childNodes.length > 0) {
+          if (isFirstPage) {
+            const pageHeader = topChild
+              .querySelector(".print-page-header")
+              .cloneNode(true);
+            const sidebar = topChild
+              .querySelector(".print-sidebar")
+              .cloneNode(true);
+            const layout = document.createElement("div");
+            layout.className = "print-layout";
+            layout.appendChild(currentPageContent);
+            layout.appendChild(sidebar);
+
+            const pageWrapper = document.createElement("div");
+            pageWrapper.className = "page-container";
+            pageWrapper.setAttribute("data-page", pageNumber.toString());
+            pageWrapper.appendChild(pageHeader);
+            pageWrapper.appendChild(layout);
+            pageWrapper.appendChild(this.createPageFooter(pageNumber));
+            pages.push(pageWrapper);
+          } else {
+            pages.push(
+              this.createPageWithHeaderFooter(
+                pageNumber,
+                speciesTitle,
+                currentPageContent,
+              ),
+            );
+          }
+        }
+      }
+    });
+
+    // Replace content with pages
+    contentElement.innerHTML = "";
+    pages.forEach((page) => {
+      contentElement.appendChild(page);
+    });
+  }
+
+  /**
+   * Create page with header (smaller title) and footer
+   * @param {number} pageNumber - Page number
+   * @param {string} title - Species title
+   * @param {HTMLElement} content - Page content
+   * @returns {HTMLElement} Page container element
+   */
+  createPageWithHeaderFooter(pageNumber, title, content) {
+    const page = document.createElement("div");
+    page.className = "page-container";
+    page.setAttribute("data-page", pageNumber.toString());
+
+    // Add page header with smaller title
+    const header = document.createElement("div");
+    header.className = "print-page-header-small";
+    header.innerHTML = `<div class="print-title-small">${title}</div>`;
+
+    // Add footer with logo
+    const footer = this.createPageFooter(pageNumber);
+
+    page.appendChild(header);
+    page.appendChild(content);
+    page.appendChild(footer);
+
+    return page;
+  }
+
+  /**
+   * Create page footer with NT Government logo
+   * @param {number} pageNumber - Page number
+   * @returns {HTMLElement} Footer element
+   */
+  createPageFooter(pageNumber) {
+    const footer = document.createElement("div");
+    footer.className = "print-page-footer";
+    footer.innerHTML = `
+      <div class="footer-content">
+        <div class="footer-left">
+          <div class="footer-department">Department of Environment, Parks and Water Security</div>
+          <div class="footer-meta">February 2026 | Page ${pageNumber}</div>
+        </div>
+        <div class="footer-right">
+          <img src="ntg-logo.webp" alt="Northern Territory Government" class="ntg-logo" />
+        </div>
+      </div>
+    `;
+    return footer;
+  }
+
+  /**
+   * Measure element height by temporarily rendering it
+   * @param {HTMLElement} element - Element to measure
+   * @returns {number} Height in pixels
+   */
+  measureElementHeight(element) {
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.visibility = "hidden";
+    tempDiv.style.width = "21cm";
+    tempDiv.style.padding = "1.5cm";
+    tempDiv.appendChild(element.cloneNode(true));
+    document.body.appendChild(tempDiv);
+
+    const height = tempDiv.offsetHeight;
+    document.body.removeChild(tempDiv);
+
+    return height;
+  }
+
+  /**
+   * Show specific page
+   * @param {number} pageNumber - Page number to show (1-indexed)
+   */
+  showPage(pageNumber) {
+    if (pageNumber < 1 || pageNumber > this.totalPages) return;
+
+    const modalElement = document.getElementById("factsheet-print-modal");
+    if (!modalElement) return;
+
+    const pages = modalElement.querySelectorAll(".page-container");
+
+    // Hide all pages
+    pages.forEach((page) => {
+      page.style.display = "none";
+    });
+
+    // Show target page (convert to 0-index)
+    if (pages[pageNumber - 1]) {
+      pages[pageNumber - 1].style.display = "block";
+    }
+
+    this.currentPage = pageNumber;
+    this.updatePageIndicator();
+    this.updateNavigationButtons();
+  }
+
+  /**
+   * Navigate to next page
+   */
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.showPage(this.currentPage + 1);
+    }
+  }
+
+  /**
+   * Navigate to previous page
+   */
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.showPage(this.currentPage - 1);
+    }
+  }
+
+  /**
+   * Update page indicator text
+   */
+  updatePageIndicator() {
+    const indicator = document.getElementById("pageIndicator");
+    if (indicator) {
+      indicator.textContent = `Page ${this.currentPage} of ${this.totalPages}`;
+    }
+  }
+
+  /**
+   * Update navigation button states
+   */
+  updateNavigationButtons() {
+    const prevBtn = document.getElementById("prevPageBtn");
+    const nextBtn = document.getElementById("nextPageBtn");
+
+    if (prevBtn) {
+      prevBtn.disabled = this.currentPage === 1;
+    }
+    if (nextBtn) {
+      nextBtn.disabled = this.currentPage === this.totalPages;
+    }
+  }
+
+  /**
+   * Generate and download PDF
+   */
+  async generatePDF() {
+    if (this.isGeneratingPDF) return;
+
+    this.isGeneratingPDF = true;
+    const pdfButton = document.getElementById("modalPDFButton");
+    const buttonText = document.getElementById("pdfButtonText");
+
+    if (pdfButton) pdfButton.disabled = true;
+    if (buttonText) buttonText.textContent = "Generating PDF...";
+
+    try {
+      const modalElement = document.getElementById("factsheet-print-modal");
+      if (!modalElement) {
+        throw new Error("Modal element not found");
+      }
+
+      const pages = modalElement.querySelectorAll(".page-container");
+      if (pages.length === 0) {
+        throw new Error("No pages found to generate PDF");
+      }
+
+      // A4 dimensions in mm
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // Wait for all images to load before generating PDF
+      await Promise.all(
+        Array.from(pages).map((page) => {
+          return Promise.all(
+            Array.from(page.querySelectorAll("img")).map((img) => {
+              if (img.complete) return Promise.resolve();
+              return new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve; // Resolve even on error to not block PDF generation
+                // Fallback timeout
+                setTimeout(resolve, 10000);
+              });
+            }),
+          );
+        }),
+      );
+
+      // Process each page
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+
+        // Temporarily show page for rendering
+        const originalDisplay = page.style.display;
+        page.style.display = "block";
+
+        // Generate canvas from page
+        const canvas = await html2canvas(page, {
+          scale: 2, // Higher quality
+          useCORS: true,
+          allowTaint: true, // Allow cross-origin images
+          logging: false,
+          backgroundColor: "#ffffff",
+          imageTimeout: 15000, // Wait up to 15 seconds for images to load
+          onclone: (clonedDoc) => {
+            // Ensure images are visible in cloned document for rendering
+            const images = clonedDoc.querySelectorAll("img");
+            images.forEach((img) => {
+              img.style.display = "block";
+              img.style.visibility = "visible";
+            });
+          },
+        });
+
+        // Restore original display
+        page.style.display = originalDisplay;
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Add new page if not first
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        // Add image to PDF
+        pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+      }
+
+      // Generate filename from species name
+      const commonName =
+        this.data?.common_name || this.data?.scientific_name || "species";
+      const filename = `${commonName.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-factsheet.pdf`;
+
+      // Save PDF
+      pdf.save(filename);
+
+      if (buttonText) buttonText.textContent = "Download PDF";
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("An error occurred while generating the PDF. Please try again.");
+      if (buttonText) buttonText.textContent = "Download PDF";
+    } finally {
+      this.isGeneratingPDF = false;
+      if (pdfButton) pdfButton.disabled = false;
     }
   }
 
@@ -519,6 +1384,19 @@ class ThreatenedSpeciesFactsheet {
       data.scientific_name || "Unknown Species",
     );
 
+    // Print button at the top
+    let printButton = `
+      <div class="factsheet-print-button d-print-none mb-3">
+        <button type="button" class="btn btn-primary" id="openPrintModal">
+          <svg width="16" height="16" fill="currentColor" class="me-2" style="vertical-align: text-bottom;">
+            <path d="M5 1a2 2 0 0 0-2 2v1h10V3a2 2 0 0 0-2-2H5zm6 8H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"/>
+            <path d="M0 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1v-2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2H2a2 2 0 0 1-2-2V7zm2.5 1a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+          </svg>
+          Print Factsheet
+        </button>
+      </div>
+    `;
+
     // Helper function to generate image-friendly filename from scientific name
     const getImageFilename = (scientificName) => {
       if (!scientificName) return "";
@@ -610,7 +1488,8 @@ class ThreatenedSpeciesFactsheet {
     };
 
     // Build HTML sections
-    let html = `<div class="factsheet-container">`;
+    let html = printButton;
+    html += `<div class="factsheet-container">`;
 
     // Conservation status section (placed at top, under subtitle)
     if (data.conservation_status_nt || data.conservation_status_australia) {
