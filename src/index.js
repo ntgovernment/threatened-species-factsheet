@@ -97,58 +97,143 @@ class ThreatenedSpeciesFactsheet {
   }
 
   /**
-   * Populate sidebar navigation with species list
-   * @param {Array} speciesList - Array of all species
-   * @param {string|null} currentSpecies - Currently selected species name
+   * Populate sidebar with media (images, maps, and credits)
+   * @param {Object|null} speciesData - Current species data object
    */
-  populateSidebarNavigation(speciesList, currentSpecies = null) {
+  populateSidebarNavigation(speciesData = null) {
     const sidebar = document.querySelector(".col-md-4.my-4.d-print-none");
-    if (!sidebar) return;
+    if (!sidebar) {
+      console.warn("Sidebar element not found");
+      return;
+    }
 
-    const currentSpeciesLower = currentSpecies
-      ? currentSpecies.toLowerCase()
-      : null;
+    // Clear existing content
+    sidebar.innerHTML = "";
 
-    // Sort species alphabetically by scientific name
-    const sortedSpecies = [...speciesList].sort((a, b) => {
-      const nameA = (a.scientific_name || "").toLowerCase();
-      const nameB = (b.scientific_name || "").toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
+    if (!speciesData) {
+      return;
+    }
 
-    let navHTML = `
-      <section class="ntg-sidenav">
-        <div class="ntg-sidenav__title">
-          <a href="?">Threatened plant species</a>
+    this.renderSidebarMedia(speciesData, sidebar);
+  }
+
+  /**
+   * Render sidebar media content
+   * @param {Object} speciesData - Species data object
+   * @param {HTMLElement} container - Container element for sidebar
+   */
+  renderSidebarMedia(speciesData, container) {
+    const mediaHTML = `
+      <div class="factsheet-sidebar-media">
+        ${this.renderSidebarImage(speciesData)}
+        ${this.renderSidebarMap(speciesData)}
+        ${this.renderSidebarRelatedInfo(speciesData)}
+      </div>
+    `;
+
+    container.innerHTML = mediaHTML;
+  }
+
+  /**
+   * Render sidebar species image
+   * @param {Object} data - Species data object
+   * @returns {string} HTML for species image
+   */
+  renderSidebarImage(data) {
+    if (!data.scientific_name) {
+      return "";
+    }
+
+    const altText = this.escapeHtml(data.common_name || data.scientific_name);
+    const imageFilename = data.scientific_name.replace(/\s+/g, "-");
+    const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
+
+    // Build figcaption with optional photo credit
+    let figcaptionText = "";
+    if (data.common_name) {
+      figcaptionText = this.escapeHtml(data.common_name);
+    }
+
+    if (data.image_credit) {
+      const creditText = data.image_credit.replace(/<[^>]*>/g, "").trim();
+      const escapedCredit = this.escapeHtml(creditText);
+      const separator = figcaptionText ? ". " : "";
+      figcaptionText += `${separator}Photo credit: ${escapedCredit}`;
+    }
+
+    return `
+      <figure class="sidebar-image mb-4">
+        <div class="sidebar-image-container">
+          <img src="${imagePath}" 
+               alt="${altText}" 
+               loading="lazy"
+               onerror="this.parentElement.parentElement.style.display='none'" />
         </div>
-        <ul class="list-group list-group-flush pt-0">
+        ${figcaptionText ? `<figcaption class="mt-2 mb-0 text-muted small">${figcaptionText}</figcaption>` : ""}
+      </figure>
     `;
+  }
 
-    sortedSpecies.forEach((species) => {
-      const scientificName = species.scientific_name || "Unknown";
-      const isActive =
-        currentSpeciesLower &&
-        scientificName.toLowerCase() === currentSpeciesLower;
-      const activeClass = isActive ? " active" : "";
-      const encodedName = encodeURIComponent(scientificName.replace(/ /g, "+"));
+  /**
+   * Render sidebar distribution map
+   * @param {Object} data - Species data object
+   * @returns {string} HTML for distribution map
+   */
+  renderSidebarMap(data) {
+    if (!data.map_image_name || !data.scientific_name) {
+      return "";
+    }
 
-      navHTML += `
-          <li class="list-group-item${activeClass}">
-            <a href="?species=${encodedName}" title="${this.escapeHtml(
-              scientificName,
-            )}">
-              <em>${this.escapeHtml(scientificName)}</em>
-            </a>
-          </li>
-      `;
-    });
+    const imageFilename = data.scientific_name.replace(/\s+/g, "-");
+    const mapPath = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${imageFilename}.webp`;
+    const altText = `Distribution map for ${this.escapeHtml(data.common_name || data.scientific_name)}`;
 
-    navHTML += `
-        </ul>
-      </section>
+    // Use common name if available, otherwise italicized scientific name
+    const speciesName = data.common_name
+      ? this.escapeHtml(data.common_name)
+      : `<em>${this.escapeHtml(data.scientific_name)}</em>`;
+
+    return `
+      <figure class="sidebar-map mb-4">
+        <img src="${mapPath}" 
+             alt="${altText}" 
+             class="img-fluid" 
+             loading="lazy"
+             onerror="this.parentElement.style.display='none'" />
+        <figcaption>Known locations of ${speciesName} in the NT (<a href="http://nrmaps.nt.gov.au" target="_blank" rel="noopener noreferrer">nrmaps.nt.gov.au</a>)</figcaption>
+      </figure>
     `;
+  }
 
-    sidebar.innerHTML = navHTML;
+  /**
+   * Render sidebar related information
+   * @param {Object} data - Species data object
+   * @returns {string} HTML for related information
+   */
+  renderSidebarRelatedInfo(data) {
+    if (!data.related_information) {
+      return "";
+    }
+
+    const relatedContent = this.renderContent(
+      data.related_information,
+      this.allowHtml,
+    );
+
+    // Replace <strong> tags with <h3> for proper semantic heading structure (WCAG)
+    const processedContent = relatedContent.replace(
+      /<strong>(.*?)<\/strong>/gi,
+      '<h3 class="sidebar-subheading">$1</h3>',
+    );
+
+    return `
+      <div class="sidebar-related-info mb-4">
+        <h2 class="sidebar-heading">Related information</h2>
+        <div class="sidebar-content">
+          ${processedContent}
+        </div>
+      </div>
+    `;
   }
 
   /**
@@ -463,57 +548,32 @@ class ThreatenedSpeciesFactsheet {
       `;
     }
 
-    // Species image (before metadata)
-    if (data.scientific_name) {
-      const imageFilename = getImageFilename(data.scientific_name);
-      const imageUrl = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
-
-      // Image credit (if available)
-      let figcaptionHtml = "";
-      if (data.image_credit) {
-        // Remove all HTML tags and escape HTML
-        const creditText = data.image_credit.replace(/<[^>]*>/g, "").trim();
-        const escapedCredit = this.escapeHtml(creditText);
-        figcaptionHtml = `<figcaption>Photo credits: ${escapedCredit}</figcaption>`;
-      }
-
+    // Only show metadata callout if there's data
+    if (data.common_name || data.family_name) {
       html += `
-        <figure class="species-image">
-          <img src="${imageUrl}" 
-               alt="${escapedScientificName}" 
-               onerror="this.parentElement.style.display='none'"
-               loading="lazy">
-          ${figcaptionHtml}
-        </figure>
-      `;
-
-      // Only show metadata callout if there's data
-      if (data.common_name || data.family_name) {
-        html += `
       <section>
         <div class="ntg-callout my-3">
           <div class="ntg-callout__content">
             <div class="factsheet-meta">`;
-        if (data.common_name) {
-          html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
-            data.common_name,
-          )}</p>`;
-        }
-        if (data.family_name) {
-          html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
-            data.family_name,
-          )}</p>`;
-        }
-        html += `</div>
+      if (data.common_name) {
+        html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
+          data.common_name,
+        )}</p>`;
+      }
+      if (data.family_name) {
+        html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
+          data.family_name,
+        )}</p>`;
+      }
+      html += `</div>
           </div>
         </div>
       </section>`;
-      }
     }
 
     // Content sections
     html += `<div class="factsheet-content">`;
-    html += renderSectionWithoutHeading(data.description, "description");
+    html += renderSection("Description", data.description, "description");
 
     // Accordion sections (Distribution to References)
     const accordionId = "accordion-" + Date.now();
@@ -536,25 +596,10 @@ class ThreatenedSpeciesFactsheet {
         <section class="accordion ntg-accordion" data-accordion-id="${accordionId}">
     `;
 
-    // Distribution section with map
-    let distributionMapHtml = "";
-    if (data.map_image_name && data.scientific_name) {
-      const imageFilename = getImageFilename(data.scientific_name);
-      const mapUrl = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${imageFilename}.webp`;
-      distributionMapHtml = `
-        <div class="distribution-map">
-          <img src="${mapUrl}" 
-               alt="Distribution map for ${escapedScientificName}" 
-               onerror="this.parentElement.style.display='none'"
-               loading="lazy">
-        </div>
-      `;
-    }
     html += renderAccordionItem(
       "Distribution",
       data.distribution,
       "distribution",
-      distributionMapHtml,
     );
     html += renderAccordionItem(
       "Ecology and life history",
@@ -599,6 +644,9 @@ class ThreatenedSpeciesFactsheet {
         data.scientific_name,
       );
     }
+
+    // Update sidebar with media instead of navigation
+    this.populateSidebarNavigation(data);
   }
 }
 
@@ -619,10 +667,6 @@ if (typeof window !== "undefined") {
         factsheet.showLoading();
 
         const speciesName = factsheet.getSpeciesFromUrl();
-
-        // Fetch all species for sidebar navigation
-        const allSpecies = await factsheet.fetchAllSpecies();
-        factsheet.populateSidebarNavigation(allSpecies, speciesName);
 
         // Fetch and display current species
         const speciesData = await factsheet.fetchSpeciesData(speciesName);

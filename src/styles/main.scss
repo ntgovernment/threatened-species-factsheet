@@ -48,30 +48,9 @@ $spacing-unit: 1rem;
   line-height: 1.4;
 }
 
-// Species image - displayed before metadata
-.species-image {
-  margin: 0 0 $spacing-unit * 1.5 0;
-
-  img {
-    max-width: 400px;
-    max-height: 400px;
-    width: 100%;
-    height: auto;
-    border: 1px solid $border-color;
-    border-radius: 0.25rem;
-  }
-}
-
 // Conservation status section (text-based with heading)
 .conservation-status-section {
   margin-bottom: $spacing-unit * 1.5;
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: $spacing-unit * 0.75;
-  }
 
   .conservation-status {
     display: flex;
@@ -97,7 +76,6 @@ $spacing-unit: 1rem;
 
   .status-act {
     font-size: 0.875rem;
-    color: #6c757d;
   }
 }
 
@@ -116,19 +94,6 @@ $spacing-unit: 1rem;
         font-weight: 600;
       }
     }
-  }
-}
-
-// Distribution map
-.distribution-map {
-  margin: $spacing-unit * 2 0;
-
-  img {
-    max-width: 600px;
-    width: 100%;
-    height: auto;
-    border: 1px solid $border-color;
-    border-radius: 0.25rem;
   }
 }
 
@@ -211,10 +176,44 @@ $spacing-unit: 1rem;
   }
 }
 
+// Sidebar Media Styles
+.factsheet-sidebar-media {
+  // Note: Heading styles (h2, h3) inherit from page defaults for consistency
+
+  .sidebar-image {
+    .sidebar-image-container {
+      width: 100%;
+      max-height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 350px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .sidebar-map {
+    img {
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+    }
+  }
+}
+
 // Responsive styles
 @media (max-width: 768px) {
-  .distribution-map {
-    margin: $spacing-unit * 1.5 0;
+  .factsheet-sidebar-media {
+    margin-top: $spacing-unit * 2;
   }
 }
 
@@ -242,29 +241,6 @@ $spacing-unit: 1rem;
   h1 {
     position: running(pageHeader);
     color: #000000 !important;
-  }
-
-  .species-image,
-  .distribution-map {
-    display: block !important;
-    page-break-inside: avoid;
-    text-align: left;
-
-    img {
-      display: block !important;
-      max-width: 100%;
-      height: auto;
-      object-fit: contain;
-      aspect-ratio: attr(width) / attr(height);
-      border: none !important;
-      margin-left: 0;
-    }
-  }
-
-  // Ensure figures are visible
-  figure {
-    display: block !important;
-    page-break-inside: avoid;
   }
 
   // Ensure conservation status section prints correctly
