@@ -169,7 +169,7 @@ class ThreatenedSpeciesFactsheet {
                loading="lazy"
                onerror="this.parentElement.parentElement.style.display='none'" />
         </div>
-        ${figcaptionText ? `<figcaption class="mt-2 mb-0 text-muted small">${figcaptionText}</figcaption>` : ""}
+        ${figcaptionText ? `<figcaption>${figcaptionText}</figcaption>` : ""}
       </figure>
     `;
   }
@@ -377,9 +377,54 @@ class ThreatenedSpeciesFactsheet {
   }
 
   initAccordionToggles() {
-    // Find all accordion togglers
-    const accordionTogglers = document.querySelectorAll(".accordion-toggler");
+    // Find all accordion containers
+    const accordions = document.querySelectorAll(".ntg-accordion");
 
+    accordions.forEach((accordion) => {
+      const buttons = accordion.querySelectorAll(".accordion-button");
+
+      buttons.forEach((button, index) => {
+        // Click/Space/Enter toggle
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          this.toggleAccordionItem(button);
+        });
+
+        // Keyboard navigation
+        button.addEventListener("keydown", (e) => {
+          const key = e.key;
+          let handled = false;
+
+          switch (key) {
+            case "ArrowDown":
+            case "ArrowRight":
+              e.preventDefault();
+              this.focusNextAccordionButton(buttons, index);
+              handled = true;
+              break;
+            case "ArrowUp":
+            case "ArrowLeft":
+              e.preventDefault();
+              this.focusPreviousAccordionButton(buttons, index);
+              handled = true;
+              break;
+            case "Home":
+              e.preventDefault();
+              buttons[0]?.focus();
+              handled = true;
+              break;
+            case "End":
+              e.preventDefault();
+              buttons[buttons.length - 1]?.focus();
+              handled = true;
+              break;
+          }
+        });
+      });
+    });
+
+    // Open/Close all functionality
+    const accordionTogglers = document.querySelectorAll(".accordion-toggler");
     accordionTogglers.forEach((toggler) => {
       const accordionId = toggler.id.replace("accordionToggle-", "");
       const accordion = document.querySelector(
@@ -394,12 +439,14 @@ class ThreatenedSpeciesFactsheet {
       if (openLink) {
         openLink.addEventListener("click", (e) => {
           e.preventDefault();
-          const collapses = accordion.querySelectorAll(".accordion-collapse");
-          collapses.forEach((collapse) => {
-            const bsCollapse = new bootstrap.Collapse(collapse, {
-              toggle: false,
-            });
-            bsCollapse.show();
+          const buttons = accordion.querySelectorAll(".accordion-button");
+          buttons.forEach((btn) => {
+            const panel = document.getElementById(
+              btn.getAttribute("aria-controls"),
+            );
+            if (panel && panel.hasAttribute("hidden")) {
+              this.toggleAccordionItem(btn);
+            }
           });
         });
       }
@@ -407,16 +454,64 @@ class ThreatenedSpeciesFactsheet {
       if (closeLink) {
         closeLink.addEventListener("click", (e) => {
           e.preventDefault();
-          const collapses = accordion.querySelectorAll(".accordion-collapse");
-          collapses.forEach((collapse) => {
-            const bsCollapse = new bootstrap.Collapse(collapse, {
-              toggle: false,
-            });
-            bsCollapse.hide();
+          const buttons = accordion.querySelectorAll(".accordion-button");
+          buttons.forEach((btn) => {
+            const panel = document.getElementById(
+              btn.getAttribute("aria-controls"),
+            );
+            if (panel && !panel.hasAttribute("hidden")) {
+              this.toggleAccordionItem(btn);
+            }
           });
         });
       }
     });
+  }
+
+  /**
+   * Toggle accordion item state
+   * @param {HTMLElement} button - Accordion button element
+   */
+  toggleAccordionItem(button) {
+    const panelId = button.getAttribute("aria-controls");
+    const panel = document.getElementById(panelId);
+
+    if (!panel) return;
+
+    const isExpanded = button.getAttribute("aria-expanded") === "true";
+
+    // Toggle ARIA state
+    button.setAttribute("aria-expanded", !isExpanded);
+
+    // Toggle hidden attribute and CSS class
+    if (isExpanded) {
+      panel.setAttribute("hidden", "");
+      button.classList.add("collapsed");
+    } else {
+      panel.removeAttribute("hidden");
+      button.classList.remove("collapsed");
+    }
+  }
+
+  /**
+   * Focus next accordion button
+   * @param {NodeList} buttons - All accordion buttons
+   * @param {number} currentIndex - Current button index
+   */
+  focusNextAccordionButton(buttons, currentIndex) {
+    const nextIndex = (currentIndex + 1) % buttons.length;
+    buttons[nextIndex]?.focus();
+  }
+
+  /**
+   * Focus previous accordion button
+   * @param {NodeList} buttons - All accordion buttons
+   * @param {number} currentIndex - Current button index
+   */
+  focusPreviousAccordionButton(buttons, currentIndex) {
+    const prevIndex =
+      currentIndex === 0 ? buttons.length - 1 : currentIndex - 1;
+    buttons[prevIndex]?.focus();
   }
 
   generateFactsheetHTML(data) {
@@ -470,12 +565,12 @@ class ThreatenedSpeciesFactsheet {
       const renderedContent = this.renderContent(content, this.allowHtml);
       return `
         <div class="accordion-item border-0 border-bottom">
-          <div class="accordion-header my-0" id="heading-${id}">
-            <button class="accordion-button rounded-0 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${id}" aria-expanded="false" aria-controls="collapse-${id}">
+          <h3 class="accordion-header my-0" id="heading-${id}">
+            <button class="accordion-button rounded-0 collapsed" type="button" id="btn-${id}" aria-expanded="false" aria-controls="panel-${id}">
               ${this.escapeHtml(title)}
             </button>
-          </div>
-          <div id="collapse-${id}" class="accordion-collapse d-print-block collapse" aria-labelledby="heading-${id}">
+          </h3>
+          <div id="panel-${id}" role="region" aria-labelledby="btn-${id}" class="accordion-collapse d-print-block" hidden>
             <div class="accordion-body">
               ${prependContent}
               ${renderedContent}
@@ -548,32 +643,19 @@ class ThreatenedSpeciesFactsheet {
       `;
     }
 
-    // Only show metadata callout if there's data
-    if (data.common_name || data.family_name) {
-      html += `
-      <section>
-        <div class="ntg-callout my-3">
-          <div class="ntg-callout__content">
-            <div class="factsheet-meta">`;
-      if (data.common_name) {
-        html += `<p class="common-name"><strong>Common Name:</strong> ${this.escapeHtml(
-          data.common_name,
-        )}</p>`;
-      }
-      if (data.family_name) {
-        html += `<p class="family-name"><strong>Family:</strong> ${this.escapeHtml(
-          data.family_name,
-        )}</p>`;
-      }
-      html += `</div>
-          </div>
-        </div>
-      </section>`;
-    }
-
     // Content sections
     html += `<div class="factsheet-content">`;
-    html += renderSection("Description", data.description, "description");
+
+    // Family name prepended to Description section
+    const familyNameHtml = data.family_name
+      ? `<p class="family-name">Family: ${this.escapeHtml(data.family_name)}</p>`
+      : "";
+    html += renderSection(
+      "Description",
+      data.description,
+      "description",
+      familyNameHtml,
+    );
 
     // Accordion sections (Distribution to References)
     const accordionId = "accordion-" + Date.now();

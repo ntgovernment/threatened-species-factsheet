@@ -43,8 +43,7 @@ $spacing-unit: 1rem;
   margin-top: -0.5rem;
   margin-bottom: $spacing-unit * 1.5;
   font-size: 1.25rem;
-  font-weight: 300;
-  color: #6c757d;
+  // font-weight: 600;
   line-height: 1.4;
 }
 
@@ -214,6 +213,93 @@ $spacing-unit: 1rem;
 @media (max-width: 768px) {
   .factsheet-sidebar-media {
     margin-top: $spacing-unit * 2;
+  }
+}
+
+// Accordion accessibility styles
+.accordion {
+  .accordion-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    background-color: #fff;
+    border: 0;
+    overflow-anchor: none;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+      border-radius 0.15s ease;
+
+    // Respect reduced motion preference
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    // Chevron icon pointing down
+    &::after {
+      flex-shrink: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-left: auto;
+      content: "";
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-size: 1.25rem;
+      transition: transform 0.2s ease-in-out;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    // Rotate chevron when expanded (not collapsed)
+    &:not(.collapsed)::after {
+      transform: rotate(-180deg);
+    }
+
+    &:hover {
+      z-index: 2;
+    }
+
+    // Ensure visible focus indicator
+    &:focus {
+      z-index: 3;
+      outline: 2px solid #005a9c;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.25);
+    }
+
+    // Use :focus-visible for modern browsers (keyboard focus only)
+    &:focus:not(:focus-visible) {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #005a9c;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.25);
+    }
+  }
+
+  .accordion-collapse {
+    overflow: hidden;
+    transition: height 0.3s ease;
+
+    // Respect reduced motion preference
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .accordion-body {
+    padding: 1rem 1.25rem;
   }
 }
 
