@@ -1386,7 +1386,7 @@ class ThreatenedSpeciesFactsheet {
 
     // Print button at the top
     let printButton = `
-      <div class="factsheet-print-button d-print-none mb-3">
+      <div class="btn ntg-btn btn-primary d-print-none mb-3">
         <button type="button" class="btn btn-primary" id="openPrintModal">
           <i class="fa-light fa-file-pdf me-2"></i>
           View PDF
