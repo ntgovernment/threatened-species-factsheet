@@ -725,8 +725,8 @@ class ThreatenedSpeciesFactsheet {
    * @param {HTMLElement} contentElement - Continuous content element
    */
   calculatePageBreaks(contentElement) {
-    // Character limits: 1100 for page 1 (sidebar), 2400 for pages 2+
-    const MAX_CHARS_PAGE_1 = 1100;
+    // Character limits: 1000 for page 1 (sidebar), 2400 for pages 2+
+    const MAX_CHARS_PAGE_1 = 1000;
     const MAX_CHARS_OTHER_PAGES = 2400;
 
     // Get the first page wrapper
@@ -1035,7 +1035,7 @@ class ThreatenedSpeciesFactsheet {
           <div class="footer-meta">February 2026 | Page ${pageNumber}</div>
         </div>
         <div class="footer-right">
-          <img src="ntg-logo.webp" alt="Northern Territory Government" class="ntg-logo" />
+          <img src="https://nt.gov.au/cdn/images/logos/logo-ntg-color.svg" alt="Northern Territory Government" class="ntg-logo" />
         </div>
       </div>
     `;
@@ -1388,11 +1388,8 @@ class ThreatenedSpeciesFactsheet {
     let printButton = `
       <div class="factsheet-print-button d-print-none mb-3">
         <button type="button" class="btn btn-primary" id="openPrintModal">
-          <svg width="16" height="16" fill="currentColor" class="me-2" style="vertical-align: text-bottom;">
-            <path d="M5 1a2 2 0 0 0-2 2v1h10V3a2 2 0 0 0-2-2H5zm6 8H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"/>
-            <path d="M0 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1v-2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2H2a2 2 0 0 1-2-2V7zm2.5 1a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
-          </svg>
-          Print Factsheet
+          <i class="fa-light fa-file-pdf me-2"></i>
+          View PDF
         </button>
       </div>
     `;
