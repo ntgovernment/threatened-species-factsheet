@@ -132,6 +132,7 @@ class ThreatenedSpeciesFactsheet {
   renderSidebarMedia(speciesData, container) {
     const mediaHTML = `
       <div class="factsheet-sidebar-media">
+        ${this.renderSidebarPDFButton()}
         ${this.renderSidebarImage(speciesData)}
         ${this.renderSidebarMap(speciesData)}
         ${this.renderSidebarRelatedInfo(speciesData)}
@@ -139,6 +140,21 @@ class ThreatenedSpeciesFactsheet {
     `;
 
     container.innerHTML = mediaHTML;
+  }
+
+  /**
+   * Render sidebar PDF button
+   * @returns {string} HTML for PDF button
+   */
+  renderSidebarPDFButton() {
+    return `
+      <div class="mb-4 d-print-none">
+        <button type="button" class="btn ntg-btn btn-primary" id="openPrintModal">
+          <i class="fa-light fa-file-pdf me-2"></i>
+          View PDF
+        </button>
+      </div>
+    `;
   }
 
   /**
@@ -1386,16 +1402,6 @@ class ThreatenedSpeciesFactsheet {
       data.scientific_name || "Unknown Species",
     );
 
-    // Print button at the top
-    let printButton = `
-      <div class="btn ntg-btn btn-primary d-print-none mb-3">
-        <button type="button" class="btn btn-primary" id="openPrintModal">
-          <i class="fa-light fa-file-pdf me-2"></i>
-          View PDF
-        </button>
-      </div>
-    `;
-
     // Helper function to generate image-friendly filename from scientific name
     const getImageFilename = (scientificName) => {
       if (!scientificName) return "";
@@ -1487,8 +1493,7 @@ class ThreatenedSpeciesFactsheet {
     };
 
     // Build HTML sections
-    let html = printButton;
-    html += `<div class="factsheet-container">`;
+    let html = `<div class="factsheet-container">`;
 
     // Conservation status section (placed at top, under subtitle)
     if (data.conservation_status_nt || data.conservation_status_australia) {
