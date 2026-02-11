@@ -122,6 +122,9 @@ class ThreatenedSpeciesFactsheet {
     }
 
     this.renderSidebarMedia(speciesData, sidebar);
+    
+    // Initialize PDF button after sidebar is rendered
+    this.initPrintButton();
   }
 
   /**
@@ -397,8 +400,6 @@ class ThreatenedSpeciesFactsheet {
       this.element.innerHTML = this.generateFactsheetHTML(this.data);
       // Initialize accordion toggle functionality
       this.initAccordionToggles();
-      // Initialize print modal button
-      this.initPrintButton();
     }
   }
 
