@@ -191,8 +191,8 @@ class ThreatenedSpeciesFactsheet {
       return "";
     }
 
-    // Derive map filename from scientific_name (spaces to hyphens, add .webp extension)
-    const mapFilename = data.map_image_name || `${data.scientific_name.replace(/\s+/g, "-")}.webp`;
+    // Always derive map filename from scientific_name (spaces to hyphens, add .webp extension)
+    const mapFilename = `${data.scientific_name.replace(/\s+/g, "-")}.webp`;
     const mapPath = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${mapFilename}`;
     const altText = `Distribution map for ${this.escapeHtml(data.common_name || data.scientific_name)}`;
 
@@ -564,8 +564,8 @@ class ThreatenedSpeciesFactsheet {
     const renderSidebarMap = () => {
       if (!data.scientific_name) return "";
 
-      // Derive map filename from scientific_name (spaces to hyphens, add .webp extension)
-      const mapFilename = data.map_image_name || `${data.scientific_name.replace(/\s+/g, "-")}.webp`;
+      // Always derive map filename from scientific_name (spaces to hyphens, add .webp extension)
+      const mapFilename = `${data.scientific_name.replace(/\s+/g, "-")}.webp`;
       const mapPath = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${mapFilename}`;
       const altText = `Distribution map for ${this.escapeHtml(commonName || data.scientific_name)}`;
       const speciesName = commonName
