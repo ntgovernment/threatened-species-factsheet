@@ -2,118 +2,141 @@
 
 ## Goal
 
-This guide defines how coding agents should operate in this repository with minimal risk and high verification quality.
+Define how coding agents should operate in this repository with low risk, high verification quality, and clear handoffs.
 
-## Project Context
+## Repository Context
 
-- Runtime type: browser component bundled with webpack
+- Runtime: browser component bundled with webpack
 - Main logic: `src/index.js`
 - Styles: `src/styles/main.scss`
 - Build outputs: `dist/threatened-species-factsheet.js`, `dist/threatened-species-factsheet.css`
 - Local test data: `get-threatened-plant-species.json`
+- Integration harness: `example.html`
 
-## Non-Negotiable Invariants
+## Core Invariants
 
-1. Keep auto-initialization on DOMContentLoaded.
-2. Keep main mount selector: `#content_area`.
-3. Keep sidebar mount selector: `.col-md-4.my-4.d-print-none`.
-4. Preserve metadata updates for page title, `<h1>`, and breadcrumb.
-5. Preserve default safe HTML rendering.
+Do not violate these without explicit instruction:
+
+1. Keep auto-initialization on `DOMContentLoaded`.
+2. Keep mount selector `#content_area`.
+3. Keep sidebar selector `.col-md-4.my-4.d-print-none`.
+4. Preserve metadata updates for document title, H1, and breadcrumb.
+5. Preserve safe escaped rendering by default.
 6. Preserve category-aware lookup:
-   - Fauna: `common_name` first, then `scientific_name`
+   - Fauna: `common_name` then `scientific_name`
    - Flora: `scientific_name` only
 7. Preserve Export to PDF modal behavior.
-8. **Flora title rule**: for `category === "Flora"`, `update()` must always use `scientific_name` as the H1 display name (italic), pass `null` as the subtitle argument, and never render a `.factsheet-subtitle` element.
-9. **Fauna title rule**: for Fauna, `update()` uses `common_name` as the H1 (non-italic) when present and passes `scientific_name` as the subtitle argument, resulting in a `.factsheet-subtitle` element below H1. Falls back to italic `scientific_name` with no subtitle when `common_name` is absent.
+8. Preserve category-aware title rules:
+   - Flora H1 is always italic scientific name, with no subtitle.
+   - Fauna H1 uses common name when present, with scientific subtitle.
 
 ## Required Pre-Edit Checks
 
-1. Read relevant logic in `src/index.js` and related styles in `src/styles/main.scss`.
-2. Check for uncommitted changes and do not revert unrelated work.
-3. Confirm whether the change requires rebuilding dist assets.
-4. If touching lookup, confirm data still provides `category` and `scientific_name`.
+Before any edits:
 
-## Execution Procedure
+1. Read relevant code in `src/index.js` and styles in `src/styles/main.scss`.
+2. Check git status and avoid reverting unrelated user changes.
+3. Identify whether docs require updates for this change.
+4. If lookup/title logic is touched, plan full matrix validation.
+5. If PDF behavior is touched, include localhost caveat in validation notes.
 
-1. Change source files in `src/`.
-2. Build with `npm run build`.
-3. Validate behavior in `example.html`.
-4. Update documentation if behavior or contract changed.
-5. Summarize outcomes with explicit limitations.
+## Standard Execution Procedure
 
-## Validation Requirements
+1. Implement source changes only in `src/` unless instructed otherwise.
+2. Run `npm run build`.
+3. Validate behavior in `example.html` with required scenario URLs.
+4. Update docs when behavior, selectors, workflows, or assumptions changed.
+5. Report outcomes with explicit pass/fail checks and caveats.
 
-### Build
+## Required Validation Matrix
+
+### Build Validation
 
 ```bash
 npm run build
 ```
 
-### Runtime Baseline
+Pass criteria:
+
+1. Build completes successfully.
+2. No new compile errors from agent changes.
+
+### Runtime Baseline Validation
 
 1. Open `http://localhost:8080/example.html`.
-2. Confirm content and sidebar render.
-3. Confirm map renders for the selected species.
+2. Confirm content renders.
+3. Confirm sidebar renders.
+4. Confirm selected species map behavior is correct.
 
-### Species Lookup Matrix
+### Lookup Validation
 
 1. `?species=Northern+Quoll` validates fauna common-name lookup.
 2. `?species=Dasyurus+hallucatus` validates fauna scientific fallback.
 3. `?species=Freycinetia+excelsa` validates flora scientific lookup.
-4. `?species=InvalidSpeciesName` validates not-found handling.
+4. `?species=InvalidSpeciesName` validates not-found state.
 
-### Title and Subtitle Matrix
+### Title and Subtitle Validation
 
-1. `?species=Freycinetia+excelsa` → H1 shows *Freycinetia excelsa* (italic); no `.factsheet-subtitle` element in DOM.
-2. `?species=Luisia+corrugata` → H1 shows *Luisia corrugata* (italic); no `.factsheet-subtitle` (even though `common_name` exists in data).
-3. `?species=Northern+Quoll` → H1 shows "Northern Quoll" (non-italic); `.factsheet-subtitle` shows *Dasyurus hallucatus* in italic.
-4. Breadcrumb and document title match H1 display name in all cases above.
+1. `?species=Freycinetia+excelsa` shows italic scientific H1 and no subtitle.
+2. `?species=Luisia+corrugata` shows italic scientific H1 and no subtitle.
+3. `?species=Northern+Quoll` shows common-name H1 and scientific subtitle.
+4. Breadcrumb and document title match expected display behavior.
 
-### Export to PDF Matrix
+### Export to PDF Validation
 
 1. Sidebar button label is Export to PDF.
-2. Modal opens successfully.
-3. Preview content corresponds to selected species.
-4. Download button is enabled when not generating.
+2. Modal opens.
+3. Preview content matches selected species.
+4. Download button is enabled when idle.
 
 ### Localhost Caveat Handling
 
-If PDF download fails due to CORS/image capture on localhost:
+If PDF download fails locally due to CORS/image capture:
 
-- report this as environment-specific
-- confirm modal/preview behavior still works
-- recommend DEV environment validation for full export
+1. Mark as environment-specific unless reproduced in DEV.
+2. Confirm modal and preview behavior still pass.
+3. Recommend DEV validation for full download confidence.
 
-## Documentation Rules for Agents
+## Documentation Update Rules
 
-Update docs when the change affects behavior, assumptions, selectors, or workflows.
+When change scope affects behavior or contract, update:
 
-Primary docs:
+1. `README.md`
+2. `docs/DEVELOPER_GUIDE.md`
+3. `docs/CODING_AGENT_GUIDE.md`
+4. `.github/copilot-instructions.md` only if AI workflow assumptions changed
 
-- `README.md`
-- `docs/DEVELOPER_GUIDE.md`
-- `docs/CODING_AGENT_GUIDE.md`
-- `.github/copilot-instructions.md` when AI workflow assumptions change
+Terminology rule:
 
-## Frequent Failure Modes
+- Use Export to PDF consistently across all docs and handoff notes.
 
-- changing selectors used for mount points
-- breaking fauna common-name fallback logic
-- assuming flora records always have common names
-- editing dist manually instead of building
-- ignoring localhost vs DEV environment differences for PDF export
-- applying `common_name` as the H1 title for Flora species (violates Flora title rule)
-- adding a `.factsheet-subtitle` element for Flora species
-- treating `update()` title logic as category-unaware (it checks `data.category`)
+## Common Failure Modes
 
-## Handoff Template for Agent Responses
+1. Breaking selectors used by mount/sidebar logic.
+2. Regressing fauna common-name lookup fallback.
+3. Using flora `common_name` for H1 display.
+4. Rendering `.factsheet-subtitle` for flora species.
+5. Editing `dist/` manually instead of building.
+6. Ignoring localhost vs DEV differences for final PDF generation.
 
-Always include:
+## Response and Handoff Template
+
+Agent responses should always include:
 
 1. What changed and why.
 2. Files changed.
-3. Build and test commands executed.
-4. Validation outcomes.
-5. Known caveats or environment-specific limitations.
-6. If lookup changed, explicit pass/fail status for all four lookup scenarios.
-7. If title logic changed, explicit pass/fail status for all title/subtitle matrix scenarios.
+3. Commands executed.
+4. Validation results.
+5. Caveats or limitations.
+6. Lookup matrix pass/fail if lookup logic touched.
+7. Title/subtitle matrix pass/fail if title logic touched.
+8. PDF matrix pass/fail if modal or export logic touched.
+
+## Stop Conditions
+
+Only stop when:
+
+1. Requested change is implemented.
+2. Validation is complete or blocked with explicit reason.
+3. Documentation updates are complete for impacted behavior.
+4. Final response includes concrete evidence of outcomes.

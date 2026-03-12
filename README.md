@@ -2,17 +2,24 @@
 
 Redistributable JavaScript and CSS bundles for rendering threatened species factsheets on NT.GOV.AU pages.
 
-This component is designed for NT Base host pages and provides:
+This project is designed to embed into NT Base host pages with minimal visual disruption and predictable runtime behavior.
 
-- factsheet content rendering
-- sidebar media and related information
-- Export to PDF modal and download workflow
+## Documentation Map
 
-## Who Should Read What
+Use the docs by role:
 
-- Developers: `docs/DEVELOPER_GUIDE.md`
-- Coding agents: `docs/CODING_AGENT_GUIDE.md`
-- AI instruction baseline: `.github/copilot-instructions.md`
+- Developers: [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)
+- Coding agents: [docs/CODING_AGENT_GUIDE.md](docs/CODING_AGENT_GUIDE.md)
+- AI baseline and constraints: [.github/copilot-instructions.md](.github/copilot-instructions.md)
+
+## What This Component Does
+
+1. Fetches species data from local JSON or API endpoint.
+2. Resolves target species from the `?species=` URL query.
+3. Applies category-aware lookup rules (Fauna vs Flora).
+4. Renders factsheet content and sidebar media.
+5. Updates page metadata (`<title>`, `<h1>`, breadcrumb).
+6. Provides an Export to PDF modal and download workflow.
 
 ## Quick Start
 
@@ -22,19 +29,19 @@ This component is designed for NT Base host pages and provides:
 npm install
 ```
 
-### 2. Run local development server
+### 2. Start local server
 
 ```bash
 npm run serve
 ```
 
-Local URLs:
+Open one of these URLs:
 
 - `http://localhost:8080/example.html`
 - `http://localhost:8080/example.html?species=Northern+Quoll`
 - `http://localhost:8080/example.html?species=Freycinetia+excelsa`
 
-### 3. Build distributable bundles
+### 3. Build production bundles
 
 ```bash
 npm run build
@@ -51,33 +58,26 @@ Build artifacts:
 npm run dev      # webpack watch mode
 npm run serve    # webpack dev server (port 8080)
 npm run build    # production build
-npm run clean    # remove dist/ (bash rm -rf)
+npm run clean    # remove dist/
 ```
 
 ## Architecture Snapshot
 
 - Main class: `ThreatenedSpeciesFactsheet` in `src/index.js`
 - Styles: `src/styles/main.scss`
-- Local data source: `get-threatened-plant-species.json`
+- Local dataset: `get-threatened-plant-species.json`
 - Integration harness: `example.html`
 
 Auto-initialization runs on `DOMContentLoaded` when `#content_area` exists.
 
-High-level runtime flow:
-
-1. Resolve environment and data URL.
-2. Read `?species=` URL parameter.
-3. Fetch species with category-aware lookup.
-4. Render factsheet and sidebar.
-5. Wire Export to PDF modal behavior.
-
 ## Species Lookup Rules
 
-The lookup behavior is intentionally category-aware.
+Lookup behavior is intentionally category-aware:
 
-- Fauna: match `common_name` first, then fallback to `scientific_name`
-- Flora: match `scientific_name` only
-- Missing `?species=`: load first species in dataset
+1. No `?species=` parameter: load first species in dataset.
+2. Fauna: match `common_name` first, then fallback to `scientific_name`.
+3. Flora: match `scientific_name` only.
+4. Matching is case-insensitive.
 
 Examples:
 
@@ -87,70 +87,92 @@ Examples:
 ?species=Freycinetia+excelsa
 ```
 
-## Title Display Rules
+## Title and Subtitle Rules
 
-Title rendering is category-aware. The `update()` method in `src/index.js` determines what appears in the page `<h1>`, breadcrumb, and document title.
+Title rendering is category-aware and drives `<h1>`, breadcrumb, and document title.
 
 | Aspect | Fauna | Flora |
 | --- | --- | --- |
-| **H1** | `common_name` (non-italic) if present, else italic `scientific_name` | Italic `scientific_name` always |
-| **`.factsheet-subtitle`** | Italic `scientific_name` shown below H1 when H1 uses `common_name` | Never shown |
-| **Breadcrumb** | Matches H1 | Italic `scientific_name` |
-| **Document title** | `displayName - Factsheet \| NT.GOV.AU` | `scientific_name - Factsheet \| NT.GOV.AU` |
+| H1 | `common_name` (non-italic) when present, else italic `scientific_name` | Italic `scientific_name` always |
+| `.factsheet-subtitle` | Shown in italic with `scientific_name` only when H1 uses `common_name` | Never shown |
+| Breadcrumb | Mirrors H1 formatting | Italic `scientific_name` |
+| Document title | `displayName - Factsheet | NT.GOV.AU` | `scientific_name - Factsheet | NT.GOV.AU` |
 
-Flora species may have a `common_name` in the data but it is intentionally ignored for all title rendering.
+Flora `common_name` values may exist in data, but are intentionally ignored for title display.
 
-## Host Integration Contract
+## Host Page Contract
 
-Expected host DOM:
+Required DOM targets:
 
-- `#content_area`
-- `.col-md-4.my-4.d-print-none`
-- `<h1>`
-- `.breadcrumb-item.active`
+- `#content_area` for main factsheet rendering
+- `.col-md-4.my-4.d-print-none` for sidebar media and Export to PDF controls
+- `<h1>` for dynamic page heading
+- `.breadcrumb-item.active` for breadcrumb label
 
-Required assets in host page:
+Required host assets:
 
-- `threatened-species-factsheet.css`
-- `threatened-species-factsheet.js`
-- Bootstrap JavaScript for modal support
+- `dist/threatened-species-factsheet.css`
+- `dist/threatened-species-factsheet.js`
+- Bootstrap JavaScript (modal support)
 
 ## Security Model
 
-- HTML is escaped by default.
-- `allowHtml` should only be used with trusted, sanitized content.
-- Never inject unsanitized user-provided HTML into rendering paths.
+1. Content is escaped by default to prevent XSS.
+2. `allowHtml` is only for trusted and sanitized HTML.
+3. Never inject unsanitized user-provided HTML into render paths.
 
-## Localhost Caveat for PDF Export
+## Testing Checklist
 
-PDF generation can fail on localhost if cross-origin image capture is blocked.
+Before merge, verify:
 
-Common symptom:
+1. Build succeeds with `npm run build`.
+2. Lookup matrix passes:
+   - `?species=Northern+Quoll`
+   - `?species=Dasyurus+hallucatus`
+   - `?species=Freycinetia+excelsa`
+   - `?species=InvalidSpeciesName`
+3. Title/subtitle rendering matches category rules.
+4. Sidebar, map, and related information render.
+5. Export to PDF modal opens and preview is correct.
 
-- alert: `An error occurred while generating the PDF. Please try again.`
+## Localhost PDF Caveat
 
-Recommended validation split:
+PDF download can fail on localhost due to cross-origin image capture restrictions.
 
-- Localhost: validate modal open, preview, and pagination.
-- DEV environment: validate final PDF generation and download.
+Typical symptom:
 
-## Branching and Deployment
+- `An error occurred while generating the PDF. Please try again.`
 
-- Development branch: `dev`
+Recommended split:
+
+1. Localhost: validate modal open, preview, and pagination.
+2. DEV environment: validate full PDF download behavior.
+
+## Deployment Model
+
+- Working branch: `dev`
 - Production branch: `main`
 - Squiz DEV tracks `dev`
 - Squiz PROD tracks `main`
-- Release path: merge `dev` to `main`
+- Release flow: merge `dev` to `main`
 
 CloudFlare caching can delay visible updates after deployment.
 
-## Definition of Done for Changes
+## Cost and Bundle Considerations
+
+Because storage and traffic are billed:
+
+1. Keep dependencies minimal.
+2. Run production build before merge.
+3. Monitor `dist/` size after large changes.
+
+## Definition of Done
 
 1. Source changes are in `src/`.
-2. Build succeeds with `npm run build`.
-3. Expected runtime behavior is verified in `example.html`.
-4. No regressions in species lookup, sidebar rendering, or Export to PDF modal.
-5. Relevant docs are updated when behavior or assumptions change.
+2. Build succeeds.
+3. Runtime behavior is validated in `example.html`.
+4. No regressions in lookup, metadata, sidebar, or PDF modal.
+5. Docs are updated when behavior or assumptions change.
 
 ## License
 

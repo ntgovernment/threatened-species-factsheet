@@ -38,9 +38,14 @@ $spacing-unit: 1rem;
   }
 }
 
+// Override Bootstrap mb-5 on h1 when followed by the scientific name subtitle
+h1:has(+ .factsheet-subtitle) {
+  margin-bottom: 0.5rem !important;
+}
+
 // Scientific name subtitle (displayed under H1 when common name is used)
 .factsheet-subtitle {
-  margin-top: -0.5rem;
+  margin-top: 0;
   margin-bottom: $spacing-unit * 1.5;
   font-size: 1.25rem;
   // font-weight: 600;
@@ -586,22 +591,18 @@ $spacing-unit: 1rem;
   .print-section {
     margin-bottom: 0.75rem;
 
-    h1 {
-      font-size: 1.15rem;
-      margin-bottom: 0.4rem;
-      color: #212529;
+    // Override Bootstrap mb-5 on h1 when followed by the scientific name subtitle
+    h1:has(+ .factsheet-subtitle) {
+      margin-bottom: 0.5rem !important;
     }
 
-    h2 {
-      font-size: 1rem;
-      margin-bottom: 0.35rem;
-      color: #212529;
-    }
-
-    h3 {
-      font-size: 0.95rem;
-      margin-bottom: 0.35rem;
-      color: #212529;
+    // Scientific name subtitle (displayed under H1 when common name is used)
+    .factsheet-subtitle {
+      margin-top: 0;
+      margin-bottom: $spacing-unit * 1.5;
+      font-size: 1.25rem;
+      // font-weight: 600;
+      line-height: 1.4;
     }
 
     .section-content {

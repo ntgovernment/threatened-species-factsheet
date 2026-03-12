@@ -122,12 +122,14 @@ map_image_name, image_credit, related_information
 Title rendering is category-aware and governed by `update()` calling `updatePageMetadata()`:
 
 **Flora:**
+
 - H1: italic `scientific_name` always — `common_name` is ignored for the title
 - Breadcrumb: italic `scientific_name`
 - Document title: `scientific_name - Factsheet | NT.GOV.AU`
 - `.factsheet-subtitle`: never shown
 
 **Fauna:**
+
 - H1: `common_name` (non-italic) when present; italic `scientific_name` if no `common_name`
 - Breadcrumb: matches H1 formatting
 - Document title: uses the display name (common or scientific)
@@ -194,8 +196,8 @@ The component expects this DOM structure (see `example.html`):
 4. Verify JS executes (check sidebar, click species link)
 5. **Verify fauna common name lookup:** `?species=Northern+Quoll` loads the Northern Quoll (Dasyurus hallucatus)
 6. **Verify fauna fallback:** `?species=Dasyurus+hallucatus` loads the same species (scientific name fallback)
-7. **Verify flora title:** `?species=Freycinetia+excelsa` → H1 shows *Freycinetia excelsa* (italic), no `.factsheet-subtitle` element
-8. **Verify fauna subtitle:** `?species=Northern+Quoll` → H1 shows "Northern Quoll" (non-italic), `.factsheet-subtitle` shows *Dasyurus hallucatus*
+7. **Verify flora title:** `?species=Freycinetia+excelsa` → H1 shows _Freycinetia excelsa_ (italic), no `.factsheet-subtitle` element
+8. **Verify fauna subtitle:** `?species=Northern+Quoll` → H1 shows "Northern Quoll" (non-italic), `.factsheet-subtitle` shows _Dasyurus hallucatus_
 9. Verify `Export to PDF` opens modal and map updates when species changes via `?species=` URL param
 
 ### Localhost PDF Export Caveat
