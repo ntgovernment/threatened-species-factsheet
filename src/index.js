@@ -1612,13 +1612,15 @@ class ThreatenedSpeciesFactsheet {
 
     // Update page metadata
     if (data) {
-      const commonName = (data.common_name || "").trim();
+      const isFlora = data.category === "Flora";
+      const commonName = isFlora ? "" : (data.common_name || "").trim();
       const displayName = commonName || data.scientific_name;
-      const isScientificName = !commonName && !!data.scientific_name;
+      const isScientificName =
+        isFlora || (!commonName && !!data.scientific_name);
       this.updatePageMetadata(
         displayName,
         isScientificName,
-        data.scientific_name,
+        isFlora ? null : data.scientific_name,
       );
     }
 

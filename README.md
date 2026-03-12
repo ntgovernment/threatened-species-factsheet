@@ -87,6 +87,19 @@ Examples:
 ?species=Freycinetia+excelsa
 ```
 
+## Title Display Rules
+
+Title rendering is category-aware. The `update()` method in `src/index.js` determines what appears in the page `<h1>`, breadcrumb, and document title.
+
+| Aspect | Fauna | Flora |
+| --- | --- | --- |
+| **H1** | `common_name` (non-italic) if present, else italic `scientific_name` | Italic `scientific_name` always |
+| **`.factsheet-subtitle`** | Italic `scientific_name` shown below H1 when H1 uses `common_name` | Never shown |
+| **Breadcrumb** | Matches H1 | Italic `scientific_name` |
+| **Document title** | `displayName - Factsheet \| NT.GOV.AU` | `scientific_name - Factsheet \| NT.GOV.AU` |
+
+Flora species may have a `common_name` in the data but it is intentionally ignored for all title rendering.
+
 ## Host Integration Contract
 
 Expected host DOM:

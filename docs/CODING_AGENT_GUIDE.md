@@ -23,6 +23,8 @@ This guide defines how coding agents should operate in this repository with mini
    - Fauna: `common_name` first, then `scientific_name`
    - Flora: `scientific_name` only
 7. Preserve Export to PDF modal behavior.
+8. **Flora title rule**: for `category === "Flora"`, `update()` must always use `scientific_name` as the H1 display name (italic), pass `null` as the subtitle argument, and never render a `.factsheet-subtitle` element.
+9. **Fauna title rule**: for Fauna, `update()` uses `common_name` as the H1 (non-italic) when present and passes `scientific_name` as the subtitle argument, resulting in a `.factsheet-subtitle` element below H1. Falls back to italic `scientific_name` with no subtitle when `common_name` is absent.
 
 ## Required Pre-Edit Checks
 
@@ -60,6 +62,13 @@ npm run build
 3. `?species=Freycinetia+excelsa` validates flora scientific lookup.
 4. `?species=InvalidSpeciesName` validates not-found handling.
 
+### Title and Subtitle Matrix
+
+1. `?species=Freycinetia+excelsa` → H1 shows *Freycinetia excelsa* (italic); no `.factsheet-subtitle` element in DOM.
+2. `?species=Luisia+corrugata` → H1 shows *Luisia corrugata* (italic); no `.factsheet-subtitle` (even though `common_name` exists in data).
+3. `?species=Northern+Quoll` → H1 shows "Northern Quoll" (non-italic); `.factsheet-subtitle` shows *Dasyurus hallucatus* in italic.
+4. Breadcrumb and document title match H1 display name in all cases above.
+
 ### Export to PDF Matrix
 
 1. Sidebar button label is Export to PDF.
@@ -93,6 +102,9 @@ Primary docs:
 - assuming flora records always have common names
 - editing dist manually instead of building
 - ignoring localhost vs DEV environment differences for PDF export
+- applying `common_name` as the H1 title for Flora species (violates Flora title rule)
+- adding a `.factsheet-subtitle` element for Flora species
+- treating `update()` title logic as category-unaware (it checks `data.category`)
 
 ## Handoff Template for Agent Responses
 
@@ -104,7 +116,4 @@ Always include:
 4. Validation outcomes.
 5. Known caveats or environment-specific limitations.
 6. If lookup changed, explicit pass/fail status for all four lookup scenarios.
-
-## Model Identity
-
-If asked what model is in use, respond with GPT-5.3-Codex.
+7. If title logic changed, explicit pass/fail status for all title/subtitle matrix scenarios.

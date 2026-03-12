@@ -41,6 +41,24 @@ On DOMContentLoaded:
 - Sidebar: Export to PDF button, species image, map, related information
 - Metadata updates: document title, page `<h1>`, breadcrumb active node
 
+### Title and Metadata Display Rules
+
+Title rendering is category-aware. The `update()` method checks `data.category` before calling `updatePageMetadata()`.
+
+**Flora (`category === "Flora"`):**
+- H1: italic `scientific_name` — `common_name` field is ignored for all title rendering
+- Breadcrumb: italic `scientific_name`
+- Document title: `scientific_name - Factsheet | NT.GOV.AU`
+- `.factsheet-subtitle` element: never created
+
+**Fauna (all other categories):**
+- H1: `common_name` (non-italic) when present; italic `scientific_name` when no `common_name`
+- Breadcrumb: mirrors H1 formatting
+- Document title: `displayName - Factsheet | NT.GOV.AU`
+- `.factsheet-subtitle`: italic `scientific_name` inserted immediately after `<h1>` only when H1 shows a common name
+
+Note: The PDF modal title (`generateModalHTML`) and PDF preview header (`generatePrintableHTML`) use `common_name || scientific_name` regardless of category — this is intentional and separate from the page H1 behavior.
+
 ### Species Lookup Rules
 
 Species lookup is category-aware and must stay stable.
@@ -52,12 +70,12 @@ Species lookup is category-aware and must stay stable.
 
 Lookup examples:
 
-| Query | Expected behavior |
-| --- | --- |
-| `?species=Northern+Quoll` | Fauna by common name |
+| Query                          | Expected behavior                 |
+| ------------------------------ | --------------------------------- |
+| `?species=Northern+Quoll`      | Fauna by common name              |
 | `?species=Dasyurus+hallucatus` | Fauna by scientific name fallback |
-| `?species=Freycinetia+excelsa` | Flora by scientific name |
-| `?species=InvalidSpeciesName` | Not-found state |
+| `?species=Freycinetia+excelsa` | Flora by scientific name          |
+| `?species=InvalidSpeciesName`  | Not-found state                   |
 
 ## Data Contract
 
@@ -80,6 +98,7 @@ Lookup examples:
 - `references`
 - `map_image_name`
 - `image_credit`
+- `related_information`
 - `related_information`
 
 ### Media Behavior Notes
@@ -121,6 +140,13 @@ npm run build
 2. `?species=Dasyurus+hallucatus` resolves same fauna via fallback.
 3. `?species=Freycinetia+excelsa` resolves flora by scientific name.
 4. `?species=InvalidSpeciesName` shows not-found UI.
+
+### Title and Subtitle Coverage
+
+1. `?species=Freycinetia+excelsa` → H1 shows *Freycinetia excelsa* (italic); no `.factsheet-subtitle` element present.
+2. `?species=Luisia+corrugata` → H1 shows *Luisia corrugata* (italic); no `.factsheet-subtitle` (even though JSON has `common_name`).
+3. `?species=Northern+Quoll` → H1 shows "Northern Quoll" (non-italic); `.factsheet-subtitle` shows *Dasyurus hallucatus* in italic.
+4. Breadcrumb and document title match H1 display name in all cases.
 
 ### Export to PDF Coverage
 

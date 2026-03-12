@@ -52,4 +52,3 @@ Contributors and coding agents now have a consistent, end-to-end guide for:
 - testing behavior thoroughly
 - reporting outcomes with clear caveats
 - preserving critical lookup and rendering behavior
-

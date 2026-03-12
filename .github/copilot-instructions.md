@@ -76,7 +76,7 @@ scientific_name, common_name, family_name, category,
 conservation_status_nt, conservation_status_australia,
 description, distribution, ecology_and_life_history,
 threatening_processes, conservation_objectives_and_management, references,
-map_image_name, image_credit
+map_image_name, image_credit, related_information
 ```
 
 **Critical for species lookup:**
@@ -91,10 +91,13 @@ map_image_name, image_credit
 - `fetchSpeciesData(speciesName)`: **Category-aware species lookup** (see Species Lookup Strategy below)
   - For Fauna: searches common_name first, then scientific_name
   - For Flora: searches scientific_name only
-- `fetchAllSpecies()`: Fetch full list for sidebar
-- `populateSidebarNavigation(speciesList, currentSpecies)`: Render sorted nav
+- `fetchAllSpecies()`: Fetch full list (defined but not used in default init flow)
+- `populateSidebarNavigation(speciesData)`: Renders sidebar media (PDF button, image, map, related info) for the given species
 - `renderContent(html, allowHtml)`: Safe content rendering with optional HTML pass-through
-- `updatePageMetadata(name)`: Update title, h1, breadcrumb for species
+- `updatePageMetadata(displayName, isScientificName, scientificName)`: Update document title, h1, breadcrumb, and conditionally insert/remove `.factsheet-subtitle`
+- `generateFactsheetHTML(data)`: Render full factsheet (conservation status, description, accordion sections)
+- `generatePrintableHTML(data)`: Render flat (non-accordion) HTML for the PDF modal preview
+- `generatePDF()`: Capture modal pages via html2canvas → jsPDF → download
 
 ### Species Lookup Strategy (Category-Aware)
 
@@ -113,6 +116,24 @@ map_image_name, image_credit
 ```
 
 **Implementation location:** [../src/index.js](../src/index.js) `fetchSpeciesData()` method
+
+### Title Display Rules (Category-Aware)
+
+Title rendering is category-aware and governed by `update()` calling `updatePageMetadata()`:
+
+**Flora:**
+- H1: italic `scientific_name` always — `common_name` is ignored for the title
+- Breadcrumb: italic `scientific_name`
+- Document title: `scientific_name - Factsheet | NT.GOV.AU`
+- `.factsheet-subtitle`: never shown
+
+**Fauna:**
+- H1: `common_name` (non-italic) when present; italic `scientific_name` if no `common_name`
+- Breadcrumb: matches H1 formatting
+- Document title: uses the display name (common or scientific)
+- `.factsheet-subtitle`: italicised `scientific_name` inserted below H1 when H1 shows `common_name`
+
+**Implementation location:** [../src/index.js](../src/index.js) `update()` and `updatePageMetadata()` methods
 
 ### State Methods
 
@@ -173,8 +194,9 @@ The component expects this DOM structure (see `example.html`):
 4. Verify JS executes (check sidebar, click species link)
 5. **Verify fauna common name lookup:** `?species=Northern+Quoll` loads the Northern Quoll (Dasyurus hallucatus)
 6. **Verify fauna fallback:** `?species=Dasyurus+hallucatus` loads the same species (scientific name fallback)
-7. **Verify flora:** `?species=Freycinetia+excelsa` loads correctly without fauna logic interfering
-8. Verify `Export to PDF` opens modal and map updates when species changes via `?species=` URL param
+7. **Verify flora title:** `?species=Freycinetia+excelsa` → H1 shows *Freycinetia excelsa* (italic), no `.factsheet-subtitle` element
+8. **Verify fauna subtitle:** `?species=Northern+Quoll` → H1 shows "Northern Quoll" (non-italic), `.factsheet-subtitle` shows *Dasyurus hallucatus*
+9. Verify `Export to PDF` opens modal and map updates when species changes via `?species=` URL param
 
 ### Localhost PDF Export Caveat
 
@@ -196,8 +218,8 @@ The component expects this DOM structure (see `example.html`):
 
 Given per-usage storage/traffic charges, minimize bundle sizes:
 
-- **No unnecessary dependencies**: Current project has zero runtime dependencies (security + cost benefit)
-- **Bundle size targets**: Keep JS <50KB and CSS <20KB (minified)
+- **Runtime dependencies**: `jspdf` and `html2canvas` are required for PDF export — these are intentional and bundled into the JS output
+- **Bundle size targets**: Keep bundles lean; monitor after dependency or feature additions
 - **Test after changes**: Run `npm run build` and check dist file sizes before committing
 
 ### Production Checklist
