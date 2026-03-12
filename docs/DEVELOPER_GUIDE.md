@@ -2,275 +2,209 @@
 
 ## Purpose
 
-This guide helps developers make safe, verifiable changes to the Threatened Species Factsheet component.
+This guide is the primary operational reference for human contributors.
+Use it to understand architecture, make changes safely, validate behavior, and release with confidence.
 
-## What This Project Builds
+## Build Outputs
 
-A UMD JavaScript bundle and CSS bundle that can be dropped into NT.GOV.AU pages to render threatened species factsheets.
-
-Output artifacts:
+This project builds redistributable UMD assets:
 
 - `dist/threatened-species-factsheet.js`
 - `dist/threatened-species-factsheet.css`
 
-## Architecture
+These files are consumed by NT.GOV.AU pages through Squiz Matrix and Git File Bridge.
 
-### Core class
+## Source of Truth Files
 
-- `ThreatenedSpeciesFactsheet` in `src/index.js`
+- `src/index.js`: component logic and runtime behavior
+- `src/styles/main.scss`: styles for content, sidebar, states, and print modal
+- `get-threatened-plant-species.json`: local development/test data
+- `example.html`: local integration harness
 
-### Initialization flow
+## Runtime Architecture
 
-On `DOMContentLoaded`:
+### Initialization Flow
 
-1. Find `#content_area`.
-2. Instantiate `ThreatenedSpeciesFactsheet` with `allowHtml: true`.
-3. Detect API URL by hostname.
-4. Read `?species=` URL parameter.
-5. Fetch species data using category-aware lookup (see **Species Lookup** section).
-6. Render main content.
-7. Render sidebar media and PDF button.
+On DOMContentLoaded:
 
-### Species Lookup
+1. Locate `#content_area`.
+2. Instantiate `ThreatenedSpeciesFactsheet`.
+3. Resolve local or production API endpoint.
+4. Parse `?species=` from URL.
+5. Fetch and resolve species data.
+6. Render content and sidebar.
+7. Initialize Export to PDF modal behavior.
 
-The `fetchSpeciesData(speciesName)` method implements category-aware species resolution:
+### Render Responsibilities
 
-**Search strategy:**
+- Main column: statuses, core sections, accordion content
+- Sidebar: Export to PDF button, species image, map, related information
+- Metadata updates: document title, page `<h1>`, breadcrumb active node
 
-1. If `speciesName` is null, return first species in dataset.
-2. Convert input to lowercase for case-insensitive matching.
-3. For fauna (category = "Fauna"):
-   - First, search for matching `common_name`
-   - If not found, search for matching `scientific_name`
-4. For flora and other categories:
-   - Search for matching `scientific_name`
+### Species Lookup Rules
 
-**Examples:**
+Species lookup is category-aware and must stay stable.
 
-| Query | Category | Match Type | Result |
-|-------|----------|-----------|--------|
-| `Northern Quoll` | Fauna | common_name | Dasyurus hallucatus |
-| `Dasyurus hallucatus` | Fauna | scientific_name | Dasyurus hallucatus (fallback) |
-| `Freycinetia excelsa` | Flora | scientific_name | Freycinetia excelsa |
+1. No query parameter: use first species in dataset.
+2. Fauna: search `common_name`, then fallback to `scientific_name`.
+3. Flora: search `scientific_name` only.
+4. Matching is case-insensitive.
 
-**Data contract:**
+Lookup examples:
 
-Species objects must have:
-- `category`: "Fauna" or "Flora" (determines lookup strategy)
-- `scientific_name`: unique identifier, always present
-- `common_name`: optional, used for fauna lookup only
-
-### Rendering model
-
-Main content:
-
-- conservation status section
-- description section
-- accordion sections for distribution, ecology, threats, conservation, references
-
-Sidebar:
-
-- `View PDF` button
-- species image
-- distribution map
-- related information
-
-PDF workflow:
-
-1. Open Bootstrap modal from sidebar button.
-2. Generate printable HTML.
-3. Paginate content into page containers.
-4. Render each page with `html2canvas`.
-5. Add rendered image to `jsPDF`.
-6. Download generated PDF.
+| Query | Expected behavior |
+| --- | --- |
+| `?species=Northern+Quoll` | Fauna by common name |
+| `?species=Dasyurus+hallucatus` | Fauna by scientific name fallback |
+| `?species=Freycinetia+excelsa` | Flora by scientific name |
+| `?species=InvalidSpeciesName` | Not-found state |
 
 ## Data Contract
 
-Primary fields consumed by rendering and lookup logic:
+### Required for Lookup
 
-**Lookup fields:**
-- `category`: "Fauna" or "Flora" — determines search strategy (mandatory for correct lookup)
-- `scientific_name`: unique species identifier, case-insensitive search (always present)
-- `common_name`: common name for fauna, null/empty for most flora (optional but critical for fauna queries)
+- `category`: differentiates Fauna vs Flora lookup behavior
+- `scientific_name`: global unique species key
+- `common_name`: required for fauna common-name queries
 
-**Display fields:**
-- `family_name`: taxonomic or general classification (mammals, birds, plants, etc.)
-- `conservation_status_nt`: NT conservation status (e.g., "Endangered", "Vulnerable")
-- `conservation_status_australia`: Australian conservation status
-- `description`: species description paragraph(s)
-- `distribution`: geographic distribution text
-- `ecology_and_life_history`: habitat and behavioral information
-- `threatening_processes`: threats to species survival
-- `conservation_objectives_and_management`: management priorities
-- `references`: citations and links
-- `image_credit`: attribution for photo (optional)
-- `related_information`: supplementary links and info (optional)
+### Used for Rendering
 
-**Media notes:**
+- `family_name`
+- `conservation_status_nt`
+- `conservation_status_australia`
+- `description`
+- `distribution`
+- `ecology_and_life_history`
+- `threatening_processes`
+- `conservation_objectives_and_management`
+- `references`
+- `map_image_name`
+- `image_credit`
+- `related_information`
 
-- map/image URLs are derived from `scientific_name` by replacing spaces with `-` and appending `.webp`
-- missing images/maps are hidden via `onerror` event handler
-- both fauna and flora use scientific name for media file naming
+### Media Behavior Notes
 
-## Local Development
+- Image/map file naming is based on `scientific_name`.
+- Missing images are hidden by runtime error handlers.
+- Media naming behavior is independent from lookup behavior.
 
-Install:
+## Development Workflow
+
+### Commands
 
 ```bash
 npm install
-```
-
-Run watch build:
-
-```bash
-npm run dev
-```
-
-Run local web server:
-
-```bash
 npm run serve
-```
-
-Production build:
-
-```bash
+npm run dev
 npm run build
 ```
 
-Clean generated files (bash shell):
+### Typical Change Flow
 
-```bash
-npm run clean
-```
+1. Update source in `src/`.
+2. Build with `npm run build`.
+3. Validate in `example.html` with target species queries.
+4. Confirm no regression in sidebar, map, accordion, or PDF modal.
+5. Update docs if behavior or assumptions changed.
 
-## Sanity Test Procedure
+## Validation Matrix
 
-### Default species and map behavior
+### Core Runtime
 
 1. Open `http://localhost:8080/example.html`.
-2. Confirm the first species from data source loads (no query parameter).
-3. Confirm map appears for default species.
-4. Verify species title, scientific name, and description display correctly.
+2. Confirm default species loads.
+3. Confirm sidebar and map render.
 
-### Fauna species—common name lookup
+### Lookup Coverage
 
-1. Navigate to: `http://localhost:8080/example.html?species=Northern+Quoll`
-2. Confirm factsheet loads with title "Northern Quoll" and scientific name "Dasyurus hallucatus".
-3. Verify status badges, image, and map display correctly.
+1. `?species=Northern+Quoll` resolves fauna by common name.
+2. `?species=Dasyurus+hallucatus` resolves same fauna via fallback.
+3. `?species=Freycinetia+excelsa` resolves flora by scientific name.
+4. `?species=InvalidSpeciesName` shows not-found UI.
 
-### Fauna species—scientific name lookup (fallback)
+### Export to PDF Coverage
 
-1. Navigate to: `http://localhost:8080/example.html?species=Dasyurus+hallucatus`
-2. Confirm same factsheet loads as above (validates common name → scientific name fallback).
+1. Confirm sidebar button label is Export to PDF.
+2. Open modal and verify preview content matches selected species.
+3. Verify pagination controls are functional.
+4. Verify Download PDF button is enabled when idle.
 
-### Flora species—scientific name lookup
+### Localhost Caveat
 
-1. Navigate to: `http://localhost:8080/example.html?species=Freycinetia+excelsa`
-2. Confirm fauna-specific behavior does not interfere with flora lookup.
-3. Verify flora factsheet displays correctly.
+On localhost, cross-origin image restrictions can break final PDF generation.
+Treat this as environment-specific unless reproduced in DEV.
 
-### Map image update on species change
+## Integration Contract for Host Pages
 
-1. Start on default species.
-2. Navigate to a different species via query string.
-3. Confirm map image `src` updates to reflect new species name.
-4. (Note: media files use scientific names regardless of lookup method)
-
-### PDF button behavior
-
-1. Click `View PDF` in sidebar.
-2. Confirm modal title and content match current species.
-3. Confirm pagination controls show current page count.
-4. Confirm `Download PDF` button is enabled when idle.
-
-### PDF generation caveat on localhost
-
-Depending on browser and CORS policy, localhost may block cross-origin image capture for PDF generation.
-
-Possible symptom:
-
-- alert: `An error occurred while generating the PDF. Please try again.`
-
-If that occurs:
-
-- validate modal open/preview locally
-- validate PDF download in DEV environment where hosting and CORS match deployment
-
-### Species not found
-
-1. Navigate to: `http://localhost:8080/example.html?species=InvalidSpeciesName`
-2. Confirm "Species Not Found" alert displays with useful message.
-3. Verify alert suggests checking species name spelling.
-
-## Integration Contract for Host Page
-
-Expected DOM elements:
+### Required DOM Targets
 
 - `#content_area`
 - `.col-md-4.my-4.d-print-none`
 - `<h1>`
 - `.breadcrumb-item.active`
 
-Required scripts/styles:
+### Required Assets
 
-- Factsheet CSS
-- Factsheet JS
-- Bootstrap JS (for modal behavior)
+- factsheet CSS bundle
+- factsheet JS bundle
+- Bootstrap JavaScript for modal support
 
-## Security Expectations
+## Security Requirements
 
-- default rendering escapes HTML
-- `allowHtml` should only be used with trusted/sanitized content
-- never route unsanitized user-generated HTML directly into rendering paths
+- Default rendering must stay escaped.
+- `allowHtml` is for trusted/sanitized content only.
+- Never feed unsanitized user HTML into render paths.
 
-## Branching and Release
+## Deployment and Release
 
-- develop on `dev`
-- release by merging `dev` into `main`
-- DEV Squiz Matrix tracks `dev`
-- PROD Squiz Matrix tracks `main`
-- CloudFlare caching may delay visible updates
+- Working branch: `dev`
+- Production branch: `main`
+- DEV environment tracks `dev`
+- PROD environment tracks `main`
+- Standard release: merge `dev` to `main`
 
-## Bundle Size and Cost Guardrails
+CloudFlare propagation may delay visible updates.
+
+## Cost and Bundle Guardrails
 
 Because storage and traffic are billed:
 
-- avoid unnecessary runtime dependencies
-- run production builds before merge
-- review `dist` sizes after significant changes
+- avoid unnecessary dependencies
+- verify production build before merge
+- monitor dist size after significant changes
 
-## Troubleshooting
+## Troubleshooting Guide
 
-### Species not found
+### Species Not Found
 
-- verify query parameter encoding (`+` for spaces)
-- verify species exists in data source and exact case-insensitive match
+- verify URL encoding for spaces (`+`)
+- confirm species exists in data source
+- confirm category fields are present and correct
 
-### Sidebar missing
+### Sidebar Missing
 
-- verify sidebar container class exists exactly as expected
+- verify required sidebar selector exists in host template
 
-### Modal not opening
+### Modal Not Opening
 
-- verify Bootstrap JS is loaded and `window.bootstrap.Modal` is available
+- verify Bootstrap JS is loaded
+- verify modal initialization runs after sidebar render
 
-### Build warnings for bundle size
+### PDF Fails on Localhost
 
-- expected with current PDF/image stack
-- treat as optimization signals, not automatic failure
+- confirm map/image CORS behavior in devtools
+- validate full PDF export in DEV environment
 
-### Dist output appears stale
+### Dist Looks Stale
 
-- rerun `npm run build`
-- verify correct branch/environment deployment
-- hard refresh and check CloudFlare cache behavior
+- rebuild with `npm run build`
+- verify deployed branch/environment
+- hard refresh to bypass cache
 
-## Change Checklist
+## Definition of Done
 
-1. Edit source files in `src/`.
-2. Keep style and behavior aligned with NT Base patterns.
-3. Run `npm run build`.
-4. Test with `example.html`.
-5. Confirm no regressions in map and PDF modal behavior.
-6. Document behavior changes in README or this guide when relevant.
+1. Behavior is correct for all lookup scenarios.
+2. Export to PDF modal still opens and previews correctly.
+3. Build succeeds.
+4. No obvious console regressions.
+5. Documentation is updated for any behavior change.

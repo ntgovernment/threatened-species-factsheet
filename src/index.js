@@ -164,9 +164,9 @@ class ThreatenedSpeciesFactsheet {
   renderSidebarPDFButton() {
     return `
       <div class="mb-4 d-print-none">
-        <button type="button" class="btn ntg-btn btn-primary" id="openPrintModal">
+        <button type="button" class="btn ntg-btn btn-primary factsheet-pdf-button" id="openPrintModal">
           <i class="fa-light fa-file-pdf me-2"></i>
-          View PDF
+          Export to PDF
         </button>
       </div>
     `;

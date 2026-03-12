@@ -2,45 +2,44 @@
 
 ## Goal
 
-This file gives coding agents fast, practical guidance for making safe changes in this repository.
+This guide defines how coding agents should operate in this repository with minimal risk and high verification quality.
 
-## Quick Context
+## Project Context
 
-- Project type: browser component, bundled with webpack
-- Main implementation: `src/index.js`
+- Runtime type: browser component bundled with webpack
+- Main logic: `src/index.js`
 - Styles: `src/styles/main.scss`
-- Output: `dist/threatened-species-factsheet.js` and `dist/threatened-species-factsheet.css`
-- Runtime data: local JSON in localhost, remote API in non-localhost environments
+- Build outputs: `dist/threatened-species-factsheet.js`, `dist/threatened-species-factsheet.css`
+- Local test data: `get-threatened-plant-species.json`
 
-## Required Behavioral Invariants
+## Non-Negotiable Invariants
 
-1. Do not break auto-initialization on `DOMContentLoaded`.
-2. Keep rendering target as `#content_area`.
-3. Keep sidebar mount as `.col-md-4.my-4.d-print-none`.
-4. Preserve safe HTML handling rules (`allowHtml` only for trusted content).
-5. Preserve metadata updates (`document.title`, `<h1>`, breadcrumb active item).
-6. **Preserve category-aware species lookup behavior:**
-   - Fauna: search common_name first, then scientific_name
-   - Flora: search scientific_name
-   - This is critical for fauna common name queries like `?species=Northern+Quoll` to work
-7. Ensure `category` field is available in species data for lookup differentiation.
+1. Keep auto-initialization on DOMContentLoaded.
+2. Keep main mount selector: `#content_area`.
+3. Keep sidebar mount selector: `.col-md-4.my-4.d-print-none`.
+4. Preserve metadata updates for page title, `<h1>`, and breadcrumb.
+5. Preserve default safe HTML rendering.
+6. Preserve category-aware lookup:
+   - Fauna: `common_name` first, then `scientific_name`
+   - Flora: `scientific_name` only
+7. Preserve Export to PDF modal behavior.
 
-## Before Editing
+## Required Pre-Edit Checks
 
-1. Read current `src/index.js` implementation around the target behavior.
-2. Check for local unstaged changes and do not revert unrelated edits.
-3. Confirm whether changes affect generated `dist/` output.
-4. If modifying species lookup: confirm you understand category-aware search (fauna vs flora) and test with both common and scientific names.
-5. Verify test data in `get-threatened-plant-species.json` includes both fauna and flora with proper `category` field.
+1. Read relevant logic in `src/index.js` and related styles in `src/styles/main.scss`.
+2. Check for uncommitted changes and do not revert unrelated work.
+3. Confirm whether the change requires rebuilding dist assets.
+4. If touching lookup, confirm data still provides `category` and `scientific_name`.
 
-## Preferred Change Pattern
+## Execution Procedure
 
-1. Modify source code in `src/` only.
-2. Run `npm run build`.
+1. Change source files in `src/`.
+2. Build with `npm run build`.
 3. Validate behavior in `example.html`.
-4. Update docs when behavior or assumptions change.
+4. Update documentation if behavior or contract changed.
+5. Summarize outcomes with explicit limitations.
 
-## Testing Checklist for Agents
+## Validation Requirements
 
 ### Build
 
@@ -48,68 +47,64 @@ This file gives coding agents fast, practical guidance for making safe changes i
 npm run build
 ```
 
-### Runtime checks
+### Runtime Baseline
 
-1. Open `http://localhost:8080/example.html` (default species loads).
-2. Verify factsheet content renders correctly.
-3. Verify map figure exists in sidebar.
-4. Verify `View PDF` button opens modal.
-5. Verify modal content reflects selected species.
-6. Verify URL species switch updates content and map.
+1. Open `http://localhost:8080/example.html`.
+2. Confirm content and sidebar render.
+3. Confirm map renders for the selected species.
 
-### Species lookup tests (critical for fauna/flora distinction)
+### Species Lookup Matrix
 
-1. **Fauna common name:** Navigate to `?species=Northern+Quoll` → confirms common name lookup works
-2. **Fauna scientific name:** Navigate to `?species=Dasyurus+hallucatus` → confirms fallback lookup works
-3. **Flora scientific name:** Navigate to `?species=Freycinetia+excelsa` → confirms flora lookup not broken by fauna logic
-4. **Invalid species:** Navigate to `?species=InvalidName` → confirms error state displays correctly
+1. `?species=Northern+Quoll` validates fauna common-name lookup.
+2. `?species=Dasyurus+hallucatus` validates fauna scientific fallback.
+3. `?species=Freycinetia+excelsa` validates flora scientific lookup.
+4. `?species=InvalidSpeciesName` validates not-found handling.
 
-### Localhost PDF export caveat
+### Export to PDF Matrix
 
-If PDF download fails with CORS/image errors on localhost, do not assume production regression.
+1. Sidebar button label is Export to PDF.
+2. Modal opens successfully.
+3. Preview content corresponds to selected species.
+4. Download button is enabled when not generating.
 
-Record in summary:
+### Localhost Caveat Handling
 
-- modal open/preview status
-- whether failure appears CORS-related
-- recommendation to validate PDF export in DEV environment
+If PDF download fails due to CORS/image capture on localhost:
 
-## Documentation Update Rules
+- report this as environment-specific
+- confirm modal/preview behavior still works
+- recommend DEV environment validation for full export
 
-When changing behavior, update at least one of:
+## Documentation Rules for Agents
+
+Update docs when the change affects behavior, assumptions, selectors, or workflows.
+
+Primary docs:
 
 - `README.md`
 - `docs/DEVELOPER_GUIDE.md`
-- `.github/copilot-instructions.md` (if AI instructions are affected)
+- `docs/CODING_AGENT_GUIDE.md`
+- `.github/copilot-instructions.md` when AI workflow assumptions change
 
-## Common Pitfalls
+## Frequent Failure Modes
 
-- assuming localhost behavior matches DEV/PROD CDN and CORS
-- editing `dist/` manually instead of generating from source
-- changing expected DOM selectors used for mounting and metadata updates
-- introducing dependencies without considering bundle size impact
-- **modifying species lookup without testing both fauna common names and flora scientific names**
-- **removing the `category` field from data or lookup logic** (breaks fauna vs flora distinction)
-- **assuming all species have common names** (flora data often has null common_name; lookup must handle this)
-- **breaking the fallback from common_name to scientific_name for fauna** (users expect both query styles to work)
+- changing selectors used for mount points
+- breaking fauna common-name fallback logic
+- assuming flora records always have common names
+- editing dist manually instead of building
+- ignoring localhost vs DEV environment differences for PDF export
 
-## Release-Aware Notes
+## Handoff Template for Agent Responses
 
-- `dev` branch is the validation path
-- `main` is production
-- CloudFlare caching can hide fresh deploys temporarily
-
-## Handoff Format for Agent Responses
-
-When finishing work, include:
+Always include:
 
 1. What changed and why.
 2. Files changed.
-3. Build/test commands run.
-4. Observed results and limitations.
-5. Any environment-specific caveats.
-6. **If species lookup was modified:** Confirm all four test queries work (fauna common, fauna sci, flora sci, invalid).
+3. Build and test commands executed.
+4. Validation outcomes.
+5. Known caveats or environment-specific limitations.
+6. If lookup changed, explicit pass/fail status for all four lookup scenarios.
 
 ## Model Identity
 
-If asked what model is being used, respond: `GPT-5.3-Codex`.
+If asked what model is in use, respond with GPT-5.3-Codex.

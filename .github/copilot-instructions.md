@@ -80,6 +80,7 @@ map_image_name, image_credit
 ```
 
 **Critical for species lookup:**
+
 - `category`: "Fauna" or "Flora" — determines lookup strategy (common name vs scientific name)
 - `scientific_name`: unique identifier for all species
 - `common_name`: optional but essential for fauna queries
@@ -98,18 +99,20 @@ map_image_name, image_credit
 ### Species Lookup Strategy (Category-Aware)
 
 **Fauna (animals):**
+
 ```javascript
 ?species=Northern+Quoll       // searches common_name → finds Dasyurus hallucatus
 ?species=Dasyurus+hallucatus  // no common_name match → searches scientific_name → finds it
 ```
 
 **Flora (plants):**
+
 ```javascript
 ?species=Freycinetia+excelsa   // searches scientific_name → finds it
 ?species=Freycinetia           // no match (looks for exact "Freycinetia", not common_name)
 ```
 
-**Implementation location:** [src/index.js](src/index.js#L51-L89) `fetchSpeciesData()` method
+**Implementation location:** [../src/index.js](../src/index.js) `fetchSpeciesData()` method
 
 ### State Methods
 
@@ -171,7 +174,7 @@ The component expects this DOM structure (see `example.html`):
 5. **Verify fauna common name lookup:** `?species=Northern+Quoll` loads the Northern Quoll (Dasyurus hallucatus)
 6. **Verify fauna fallback:** `?species=Dasyurus+hallucatus` loads the same species (scientific name fallback)
 7. **Verify flora:** `?species=Freycinetia+excelsa` loads correctly without fauna logic interfering
-8. Verify `View PDF` opens modal and map updates when species changes via `?species=` URL param
+8. Verify `Export to PDF` opens modal and map updates when species changes via `?species=` URL param
 
 ### Localhost PDF Export Caveat
 

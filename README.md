@@ -1,12 +1,18 @@
 # Threatened Species Factsheet
 
-Redistributable JavaScript and CSS bundles for threatened species factsheets on NT.GOV.AU.
+Redistributable JavaScript and CSS bundles for rendering threatened species factsheets on NT.GOV.AU pages.
 
-The component is designed for NT Base pages and renders:
+This component is designed for NT Base host pages and provides:
 
-- species factsheet content
-- a media sidebar (photo, distribution map, related information)
-- a PDF preview modal with downloadable export
+- factsheet content rendering
+- sidebar media and related information
+- Export to PDF modal and download workflow
+
+## Who Should Read What
+
+- Developers: `docs/DEVELOPER_GUIDE.md`
+- Coding agents: `docs/CODING_AGENT_GUIDE.md`
+- AI instruction baseline: `.github/copilot-instructions.md`
 
 ## Quick Start
 
@@ -16,75 +22,28 @@ The component is designed for NT Base pages and renders:
 npm install
 ```
 
-### 2. Start local development server
+### 2. Run local development server
 
 ```bash
 npm run serve
 ```
 
-Open:
+Local URLs:
 
 - `http://localhost:8080/example.html`
+- `http://localhost:8080/example.html?species=Northern+Quoll`
 - `http://localhost:8080/example.html?species=Freycinetia+excelsa`
 
-### 3. Build distributable assets
+### 3. Build distributable bundles
 
 ```bash
 npm run build
 ```
 
-Build output:
+Build artifacts:
 
 - `dist/threatened-species-factsheet.js`
 - `dist/threatened-species-factsheet.css`
-
-## Documentation Index
-
-- `docs/DEVELOPER_GUIDE.md`: architecture, workflows, deployment, troubleshooting
-- `docs/CODING_AGENT_GUIDE.md`: operational guardrails and workflow for coding agents
-- `.github/copilot-instructions.md`: condensed AI-focused project instructions
-
-## Repository Structure
-
-- `src/index.js`: main component class and auto-initialization logic
-- `src/styles/main.scss`: component styling
-- `example.html`: local integration template and test harness
-- `get-threatened-plant-species.json`: local data source for development
-- `dist/`: generated distributable bundles for deployment
-
-## Runtime Behavior
-
-On `DOMContentLoaded`, the bundle auto-initializes when `#content_area` is present:
-
-1. Detect local vs production host.
-2. Resolve API URL.
-3. Read `?species=` from URL.
-4. Fetch species data using category-aware lookup (see **Species Lookup** below).
-5. Render factsheet content into `#content_area`.
-6. Render sidebar media into `.col-md-4.my-4.d-print-none`.
-7. Attach PDF modal button behavior.
-
-### Species Lookup
-
-The component uses category-aware species lookup to determine how to search for species by name:
-
-- **Fauna** (animals): Searches by common name first (e.g., `?species=Northern+Quoll`), then falls back to scientific name if no match
-- **Flora** (plants): Searches by scientific name (e.g., `?species=Freycinetia+excelsa`)
-
-This design accommodates that fauna typically have well-known common names, while flora often lack them in the dataset.
-
-**Query string examples:**
-
-```
-?species=Northern+Quoll                  # fauna by common name
-?species=Dasyurus+hallucatus             # fauna by scientific name (fallback)
-?species=Freycinetia+excelsa             # flora by scientific name
-```
-
-## Environment Data Source
-
-- Localhost (`localhost` or `127.0.0.1`): `/get-threatened-plant-species.json`
-- Non-localhost: production API endpoint configured in `src/index.js`
 
 ## Commands
 
@@ -92,62 +51,93 @@ This design accommodates that fauna typically have well-known common names, whil
 npm run dev      # webpack watch mode
 npm run serve    # webpack dev server (port 8080)
 npm run build    # production build
-npm run clean    # remove dist (bash rm -rf)
+npm run clean    # remove dist/ (bash rm -rf)
 ```
 
-Note: `npm run clean` uses `rm -rf` and is intended for bash-compatible shells.
+## Architecture Snapshot
+
+- Main class: `ThreatenedSpeciesFactsheet` in `src/index.js`
+- Styles: `src/styles/main.scss`
+- Local data source: `get-threatened-plant-species.json`
+- Integration harness: `example.html`
+
+Auto-initialization runs on `DOMContentLoaded` when `#content_area` exists.
+
+High-level runtime flow:
+
+1. Resolve environment and data URL.
+2. Read `?species=` URL parameter.
+3. Fetch species with category-aware lookup.
+4. Render factsheet and sidebar.
+5. Wire Export to PDF modal behavior.
+
+## Species Lookup Rules
+
+The lookup behavior is intentionally category-aware.
+
+- Fauna: match `common_name` first, then fallback to `scientific_name`
+- Flora: match `scientific_name` only
+- Missing `?species=`: load first species in dataset
+
+Examples:
+
+```text
+?species=Northern+Quoll
+?species=Dasyurus+hallucatus
+?species=Freycinetia+excelsa
+```
+
+## Host Integration Contract
+
+Expected host DOM:
+
+- `#content_area`
+- `.col-md-4.my-4.d-print-none`
+- `<h1>`
+- `.breadcrumb-item.active`
+
+Required assets in host page:
+
+- `threatened-species-factsheet.css`
+- `threatened-species-factsheet.js`
+- Bootstrap JavaScript for modal support
 
 ## Security Model
 
-- Content is escaped by default to reduce XSS risk.
-- `allowHtml` is enabled in auto-init for trusted, pre-sanitized API content.
-- Do not pass unsanitized user input to `allowHtml` rendering paths.
+- HTML is escaped by default.
+- `allowHtml` should only be used with trusted, sanitized content.
+- Never inject unsanitized user-provided HTML into rendering paths.
 
-## Integration Requirements
+## Localhost Caveat for PDF Export
 
-The component expects these page elements to exist:
+PDF generation can fail on localhost if cross-origin image capture is blocked.
 
-- `#content_area` as the main content mount
-- `.col-md-4.my-4.d-print-none` as the sidebar mount
-- `<h1>` and `.breadcrumb-item.active` for metadata updates
-
-Required assets in the page:
-
-- CSS: `threatened-species-factsheet.css`
-- JS: `threatened-species-factsheet.js`
-
-## Known Local Testing Caveat
-
-PDF export may fail on localhost when cross-origin images are blocked by CORS (for assets hosted on `https://nt.gov.au`).
-
-Symptoms:
+Common symptom:
 
 - alert: `An error occurred while generating the PDF. Please try again.`
-- console: `Invalid argument passed to jsPDF.scale`
 
-Recommendation:
+Recommended validation split:
 
-- validate map and PDF modal open/preview locally
-- validate actual PDF generation on the DEV environment where asset hosting/CORS matches deployment
+- Localhost: validate modal open, preview, and pagination.
+- DEV environment: validate final PDF generation and download.
 
-## Branch and Deployment Workflow
+## Branching and Deployment
 
-- Active development branch: `dev`
+- Development branch: `dev`
 - Production branch: `main`
-- Squiz Matrix DEV tracks `dev`
-- Squiz Matrix PROD tracks `main`
-- Production release: merge `dev` into `main`
+- Squiz DEV tracks `dev`
+- Squiz PROD tracks `main`
+- Release path: merge `dev` to `main`
 
-CloudFlare caching can delay visibility of deployed updates.
+CloudFlare caching can delay visible updates after deployment.
 
-## Contribution Checklist
+## Definition of Done for Changes
 
-1. Make source changes in `src/`.
-2. Run `npm run build`.
-3. Verify `example.html` behavior for target species.
-4. Confirm no console/runtime regressions relevant to your changes.
-5. Check generated `dist/` outputs.
-6. Commit source and required built artifacts.
+1. Source changes are in `src/`.
+2. Build succeeds with `npm run build`.
+3. Expected runtime behavior is verified in `example.html`.
+4. No regressions in species lookup, sidebar rendering, or Export to PDF modal.
+5. Relevant docs are updated when behavior or assumptions change.
 
 ## License
 

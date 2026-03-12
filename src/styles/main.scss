@@ -179,6 +179,10 @@ $spacing-unit: 1rem;
 .factsheet-sidebar-media {
   // Note: Heading styles (h2, h3) inherit from page defaults for consistency
 
+  .factsheet-pdf-button {
+    border-radius: 0;
+  }
+
   .sidebar-image {
     .sidebar-image-container {
       width: 100%;
