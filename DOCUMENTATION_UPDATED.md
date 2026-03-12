@@ -2,7 +2,7 @@
 
 ## Scope
 
-Documentation has been reorganized and expanded to better support both human developers and coding agents.
+Documentation has been rewritten to be more useful as an operational reference for both human developers and coding agents.
 
 Updated files:
 
@@ -13,45 +13,44 @@ Updated files:
 
 ## What Was Improved
 
-### 1. Clearer Onboarding and Navigation
+### 1. Better onboarding and navigation
 
-1. Added a role-based documentation map in README.
-2. Clarified where developers and coding agents should start.
-3. Added concise project purpose and component behavior summary.
+1. Clarified which document each audience should read first.
+2. Expanded the README into a practical repository overview instead of a short project blurb.
+3. Documented the project structure and the role of each source file.
 
-### 2. Stronger Architecture and Contract Clarity
+### 2. Stronger architecture and contract clarity
 
-1. Standardized runtime flow descriptions across docs.
-2. Clarified source-of-truth files and responsibilities.
-3. Documented host page DOM and asset integration contract.
+1. Documented the real runtime flow from `DOMContentLoaded` through factsheet render, metadata update, sidebar render, modal preview, and PDF generation.
+2. Added file-responsibility guidance for `src/index.js`, `src/styles/main.scss`, and `webpack.config.js`.
+3. Documented the host-page selector contract and why those selectors are risky to change.
 
-### 3. Expanded Validation Guidance
+### 3. More useful behavior guidance
 
-1. Standardized lookup validation matrix:
-   - fauna common-name lookup
-   - fauna scientific-name fallback
-   - flora scientific-name lookup
-   - invalid species not-found behavior
-2. Standardized title/subtitle validation scenarios.
-3. Standardized Export to PDF modal and preview checks.
+1. Preserved and clarified category-aware lookup rules.
+2. Preserved and clarified category-aware title and subtitle rules.
+3. Added explicit notes on the split between the main factsheet render path and the printable modal render path.
+4. Added guidance for the Conservation status alert section and its readable status typography.
 
-### 4. Better Agent Operational Guidance
+### 4. Better workflow and validation guidance
 
-1. Documented non-negotiable invariants.
-2. Added required pre-edit checks and execution procedure.
-3. Added explicit handoff template and stop conditions.
+1. Expanded local development notes and command expectations.
+2. Added change recipes for common edits so contributors know which files and methods to inspect together.
+3. Kept a consistent validation matrix for lookup, metadata, sidebar, and Export to PDF behavior.
+4. Kept the localhost PDF caveat explicit and connected it to DEV validation.
 
-### 5. Consistent Terminology and Caveats
+### 5. Better coding-agent guidance
 
-1. Standardized Export to PDF wording.
-2. Preserved localhost CORS caveat guidance for PDF export.
-3. Clarified when DEV environment validation is required.
+1. Expanded the agent guide beyond invariants into code hotspots, pre-edit checks, change heuristics, and common failure modes.
+2. Clarified when agents must update both render paths.
+3. Clarified what a useful handoff should contain.
 
 ## Expected Outcome
 
 Developers and coding agents should now be able to:
 
 1. onboard faster
-2. make safer changes
-3. validate behavior consistently
-4. hand off work with clear pass/fail evidence
+2. understand where behavior lives before editing
+3. make safer changes in both screen and printable render paths
+4. validate the right scenarios consistently
+5. hand off work with fewer hidden assumptions

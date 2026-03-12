@@ -75,11 +75,33 @@ h1:has(+ .factsheet-subtitle) {
   }
 
   .status-text {
-    font-size: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
   }
 
   .status-act {
     font-size: 0.875rem;
+  }
+}
+
+.conservation-status-alert {
+  background: var(--clr-bg-default, #ffffff);
+  border-left: 8px solid var(--clr-status-info, #107cc0);
+  border-top: 1px solid var(--clr-status-info, #107cc0);
+  border-right: 1px solid var(--clr-status-info, #107cc0);
+  border-bottom: 1px solid var(--clr-status-info, #107cc0);
+  color: var(--clr-text-default, #1f1e27);
+  padding: 1rem 1.5rem;
+
+  h1,
+  h2 {
+    margin-top: 0;
+  }
+
+  .section-content > :last-child,
+  .conservation-status > :last-child {
+    margin-bottom: 0;
   }
 }
 
@@ -809,6 +831,12 @@ h1:has(+ .factsheet-subtitle) {
     display: block !important;
     page-break-inside: avoid;
     margin-bottom: 1.5rem;
+  }
+
+  .conservation-status-alert {
+    display: block !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   // Ensure callout is visible in print

@@ -662,7 +662,7 @@ class ThreatenedSpeciesFactsheet {
 
     // Conservation status
     if (data.conservation_status_nt || data.conservation_status_australia) {
-      html += `<section class="print-section conservation-status-section">`;
+      html += `<section class="print-section conservation-status-section conservation-status-alert">`;
       html += `<h1>Conservation status</h1>`;
       html += `<div class="section-content">`;
 
@@ -1510,7 +1510,7 @@ class ThreatenedSpeciesFactsheet {
     // Conservation status section (placed at top, under subtitle)
     if (data.conservation_status_nt || data.conservation_status_australia) {
       html += `
-        <section class="conservation-status-section" aria-labelledby="status-heading">
+        <section class="conservation-status-section conservation-status-alert" aria-labelledby="status-heading">
           <h2 id="status-heading">Conservation status</h2>
           <div class="conservation-status">
       `;
