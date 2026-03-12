@@ -27,9 +27,38 @@ On `DOMContentLoaded`:
 2. Instantiate `ThreatenedSpeciesFactsheet` with `allowHtml: true`.
 3. Detect API URL by hostname.
 4. Read `?species=` URL parameter.
-5. Fetch species data.
+5. Fetch species data using category-aware lookup (see **Species Lookup** section).
 6. Render main content.
 7. Render sidebar media and PDF button.
+
+### Species Lookup
+
+The `fetchSpeciesData(speciesName)` method implements category-aware species resolution:
+
+**Search strategy:**
+
+1. If `speciesName` is null, return first species in dataset.
+2. Convert input to lowercase for case-insensitive matching.
+3. For fauna (category = "Fauna"):
+   - First, search for matching `common_name`
+   - If not found, search for matching `scientific_name`
+4. For flora and other categories:
+   - Search for matching `scientific_name`
+
+**Examples:**
+
+| Query | Category | Match Type | Result |
+|-------|----------|-----------|--------|
+| `Northern Quoll` | Fauna | common_name | Dasyurus hallucatus |
+| `Dasyurus hallucatus` | Fauna | scientific_name | Dasyurus hallucatus (fallback) |
+| `Freycinetia excelsa` | Flora | scientific_name | Freycinetia excelsa |
+
+**Data contract:**
+
+Species objects must have:
+- `category`: "Fauna" or "Flora" (determines lookup strategy)
+- `scientific_name`: unique identifier, always present
+- `common_name`: optional, used for fauna lookup only
 
 ### Rendering model
 
@@ -57,26 +86,31 @@ PDF workflow:
 
 ## Data Contract
 
-Primary fields consumed by rendering logic:
+Primary fields consumed by rendering and lookup logic:
 
-- `scientific_name`
-- `common_name`
-- `family_name`
-- `conservation_status_nt`
-- `conservation_status_australia`
-- `description`
-- `distribution`
-- `ecology_and_life_history`
-- `threatening_processes`
-- `conservation_objectives_and_management`
-- `references`
-- `image_credit`
-- `related_information` (optional)
+**Lookup fields:**
+- `category`: "Fauna" or "Flora" — determines search strategy (mandatory for correct lookup)
+- `scientific_name`: unique species identifier, case-insensitive search (always present)
+- `common_name`: common name for fauna, null/empty for most flora (optional but critical for fauna queries)
 
-Notes:
+**Display fields:**
+- `family_name`: taxonomic or general classification (mammals, birds, plants, etc.)
+- `conservation_status_nt`: NT conservation status (e.g., "Endangered", "Vulnerable")
+- `conservation_status_australia`: Australian conservation status
+- `description`: species description paragraph(s)
+- `distribution`: geographic distribution text
+- `ecology_and_life_history`: habitat and behavioral information
+- `threatening_processes`: threats to species survival
+- `conservation_objectives_and_management`: management priorities
+- `references`: citations and links
+- `image_credit`: attribution for photo (optional)
+- `related_information`: supplementary links and info (optional)
 
-- map/image URLs are currently derived from `scientific_name` by replacing spaces with `-` and appending `.webp`
-- missing images/maps are hidden via `onerror`
+**Media notes:**
+
+- map/image URLs are derived from `scientific_name` by replacing spaces with `-` and appending `.webp`
+- missing images/maps are hidden via `onerror` event handler
+- both fauna and flora use scientific name for media file naming
 
 ## Local Development
 
@@ -112,13 +146,36 @@ npm run clean
 
 ## Sanity Test Procedure
 
-### Map behavior
+### Default species and map behavior
 
 1. Open `http://localhost:8080/example.html`.
-2. Confirm map appears for default species.
-3. Navigate to a specific species URL, for example:
-   `http://localhost:8080/example.html?species=Macrotis+lagotis`
-4. Confirm map image source updates to the selected species.
+2. Confirm the first species from data source loads (no query parameter).
+3. Confirm map appears for default species.
+4. Verify species title, scientific name, and description display correctly.
+
+### Fauna species—common name lookup
+
+1. Navigate to: `http://localhost:8080/example.html?species=Northern+Quoll`
+2. Confirm factsheet loads with title "Northern Quoll" and scientific name "Dasyurus hallucatus".
+3. Verify status badges, image, and map display correctly.
+
+### Fauna species—scientific name lookup (fallback)
+
+1. Navigate to: `http://localhost:8080/example.html?species=Dasyurus+hallucatus`
+2. Confirm same factsheet loads as above (validates common name → scientific name fallback).
+
+### Flora species—scientific name lookup
+
+1. Navigate to: `http://localhost:8080/example.html?species=Freycinetia+excelsa`
+2. Confirm fauna-specific behavior does not interfere with flora lookup.
+3. Verify flora factsheet displays correctly.
+
+### Map image update on species change
+
+1. Start on default species.
+2. Navigate to a different species via query string.
+3. Confirm map image `src` updates to reflect new species name.
+4. (Note: media files use scientific names regardless of lookup method)
 
 ### PDF button behavior
 
@@ -139,6 +196,12 @@ If that occurs:
 
 - validate modal open/preview locally
 - validate PDF download in DEV environment where hosting and CORS match deployment
+
+### Species not found
+
+1. Navigate to: `http://localhost:8080/example.html?species=InvalidSpeciesName`
+2. Confirm "Species Not Found" alert displays with useful message.
+3. Verify alert suggests checking species name spelling.
 
 ## Integration Contract for Host Page
 

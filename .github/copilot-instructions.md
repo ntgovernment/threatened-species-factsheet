@@ -17,7 +17,10 @@ A redistributable JavaScript/CSS component for displaying threatened species fac
 - **Data Source**: `get-threatened-plant-species.json` (localhost) or API endpoint (production)
 - **Component**: `ThreatenedSpeciesFactsheet` class (`src/index.js`)
 - **Initialization**: Auto-mounts on `DOMContentLoaded` to `#content_area` element
-- **URL Pattern**: `?species=Scientific+Name` (encoded) fetches specific species; omitted fetches first species
+- **URL Pattern**: Category-aware species lookup
+  - **Fauna** (animals): `?species=CommonName` (e.g., `?species=Northern+Quoll`) or `?species=ScientificName` for fallback
+  - **Flora** (plants): `?species=ScientificName` (e.g., `?species=Freycinetia+excelsa`)
+  - Omitted: fetches first species
 - **Sidebar**: Auto-populates from `fetch(/api)` with alphabetically sorted species list
 
 ### Security Model (Critical)
@@ -69,21 +72,44 @@ npm run clean    # Remove dist/ folder
 Each species object has these key fields (see `get-threatened-plant-species.json`):
 
 ```
-scientific_name, common_name, family_name,
+scientific_name, common_name, family_name, category,
 conservation_status_nt, conservation_status_australia,
 description, distribution, ecology_and_life_history,
 threatening_processes, conservation_objectives_and_management, references,
 map_image_name, image_credit
 ```
 
+**Critical for species lookup:**
+- `category`: "Fauna" or "Flora" — determines lookup strategy (common name vs scientific name)
+- `scientific_name`: unique identifier for all species
+- `common_name`: optional but essential for fauna queries
+
 ### Component Methods
 
-- `getSpeciesFromUrl()`: Extract `?species=` param
-- `fetchSpeciesData(scientificName)`: Case-insensitive species lookup
+- `getSpeciesFromUrl()`: Extract `?species=` param and decode
+- `fetchSpeciesData(speciesName)`: **Category-aware species lookup** (see Species Lookup Strategy below)
+  - For Fauna: searches common_name first, then scientific_name
+  - For Flora: searches scientific_name only
 - `fetchAllSpecies()`: Fetch full list for sidebar
 - `populateSidebarNavigation(speciesList, currentSpecies)`: Render sorted nav
 - `renderContent(html, allowHtml)`: Safe content rendering with optional HTML pass-through
 - `updatePageMetadata(name)`: Update title, h1, breadcrumb for species
+
+### Species Lookup Strategy (Category-Aware)
+
+**Fauna (animals):**
+```javascript
+?species=Northern+Quoll       // searches common_name → finds Dasyurus hallucatus
+?species=Dasyurus+hallucatus  // no common_name match → searches scientific_name → finds it
+```
+
+**Flora (plants):**
+```javascript
+?species=Freycinetia+excelsa   // searches scientific_name → finds it
+?species=Freycinetia           // no match (looks for exact "Freycinetia", not common_name)
+```
+
+**Implementation location:** [src/index.js](src/index.js#L51-L89) `fetchSpeciesData()` method
 
 ### State Methods
 
@@ -142,7 +168,10 @@ The component expects this DOM structure (see `example.html`):
 2. Open `example.html` in browser
 3. Verify CSS loads at `dist/threatened-species-factsheet.css`
 4. Verify JS executes (check sidebar, click species link)
-5. Verify `View PDF` opens modal and map updates when species changes via `?species=` URL param
+5. **Verify fauna common name lookup:** `?species=Northern+Quoll` loads the Northern Quoll (Dasyurus hallucatus)
+6. **Verify fauna fallback:** `?species=Dasyurus+hallucatus` loads the same species (scientific name fallback)
+7. **Verify flora:** `?species=Freycinetia+excelsa` loads correctly without fauna logic interfering
+8. Verify `View PDF` opens modal and map updates when species changes via `?species=` URL param
 
 ### Localhost PDF Export Caveat
 

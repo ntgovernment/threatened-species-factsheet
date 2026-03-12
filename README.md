@@ -59,10 +59,27 @@ On `DOMContentLoaded`, the bundle auto-initializes when `#content_area` is prese
 1. Detect local vs production host.
 2. Resolve API URL.
 3. Read `?species=` from URL.
-4. Fetch species data.
+4. Fetch species data using category-aware lookup (see **Species Lookup** below).
 5. Render factsheet content into `#content_area`.
 6. Render sidebar media into `.col-md-4.my-4.d-print-none`.
 7. Attach PDF modal button behavior.
+
+### Species Lookup
+
+The component uses category-aware species lookup to determine how to search for species by name:
+
+- **Fauna** (animals): Searches by common name first (e.g., `?species=Northern+Quoll`), then falls back to scientific name if no match
+- **Flora** (plants): Searches by scientific name (e.g., `?species=Freycinetia+excelsa`)
+
+This design accommodates that fauna typically have well-known common names, while flora often lack them in the dataset.
+
+**Query string examples:**
+
+```
+?species=Northern+Quoll                  # fauna by common name
+?species=Dasyurus+hallucatus             # fauna by scientific name (fallback)
+?species=Freycinetia+excelsa             # flora by scientific name
+```
 
 ## Environment Data Source
 

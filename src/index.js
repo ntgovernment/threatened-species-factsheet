@@ -45,7 +45,7 @@ class ThreatenedSpeciesFactsheet {
 
   /**
    * Fetch species data from API
-   * @param {string|null} scientificName - Scientific name to search for, or null for first species
+   * @param {string|null} scientificName - Species name to search for (common name for fauna, scientific name for flora), or null for first species
    * @returns {Promise<Object|null>} Species data object or null if not found
    */
   async fetchSpeciesData(scientificName = null) {
@@ -67,11 +67,23 @@ class ThreatenedSpeciesFactsheet {
 
       // Case-insensitive search for species
       const speciesLower = scientificName.toLowerCase();
-      const foundSpecies = data.find(
+
+      // First, try matching by common_name (for fauna)
+      let foundSpecies = data.find(
         (species) =>
-          species.scientific_name &&
-          species.scientific_name.toLowerCase() === speciesLower,
+          species.category === "Fauna" &&
+          species.common_name &&
+          species.common_name.toLowerCase() === speciesLower,
       );
+
+      // If not found by common name, try matching by scientific_name (fallback for fauna or primary search for flora)
+      if (!foundSpecies) {
+        foundSpecies = data.find(
+          (species) =>
+            species.scientific_name &&
+            species.scientific_name.toLowerCase() === speciesLower,
+        );
+      }
 
       return foundSpecies || null;
     } catch (error) {
