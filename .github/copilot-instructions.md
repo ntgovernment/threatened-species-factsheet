@@ -4,6 +4,12 @@
 
 A redistributable JavaScript/CSS component for displaying threatened species factsheets on NT.GOV.AU. Builds UMD bundles (JS + CSS) that integrate seamlessly into NT.GOV.AU's NT Base design system without adding custom borders/backgrounds.
 
+## Documentation Map
+
+- `README.md`: high-level project entrypoint and commands
+- `docs/DEVELOPER_GUIDE.md`: architecture, test workflows, troubleshooting, release flow
+- `docs/CODING_AGENT_GUIDE.md`: coding-agent workflow, invariants, and handoff format
+
 ## Architecture & Key Components
 
 ### Data Flow
@@ -136,6 +142,13 @@ The component expects this DOM structure (see `example.html`):
 2. Open `example.html` in browser
 3. Verify CSS loads at `dist/threatened-species-factsheet.css`
 4. Verify JS executes (check sidebar, click species link)
+5. Verify `View PDF` opens modal and map updates when species changes via `?species=` URL param
+
+### Localhost PDF Export Caveat
+
+- PDF download can fail on localhost due to cross-origin image capture restrictions when generating canvas/PDF
+- Typical symptom: alert with `An error occurred while generating the PDF. Please try again.`
+- For release confidence, validate full PDF download behavior in DEV environment where domain and CORS are production-like
 
 ## Debugging Tips
 
