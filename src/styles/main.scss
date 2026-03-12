@@ -1,69 +1,34 @@
 // Variables
 $primary-color: #2c5f2d;
 $secondary-color: #97bc62;
-$text-color: #333;
-$background-color: #f5f5f5;
-$border-color: #ddd;
-$border-radius: 4px;
+$border-color: #dee2e6;
 $spacing-unit: 1rem;
-
-// Mixins
-@mixin box-shadow($shadow) {
-  -webkit-box-shadow: $shadow;
-  -moz-box-shadow: $shadow;
-  box-shadow: $shadow;
-}
 
 // Threatened Species Factsheet Styles
 .threatened-species-factsheet {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  color: $text-color;
+  // Inherit all typography from parent page
   max-width: 100%;
   margin: 0 auto;
 
   .factsheet-container {
-    background-color: #fff;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    padding: $spacing-unit * 2;
-    margin-bottom: $spacing-unit;
-    @include box-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  }
-
-  .factsheet-title {
-    color: $primary-color;
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: 0 0 $spacing-unit 0;
-    padding-bottom: calc($spacing-unit / 2);
-    border-bottom: 2px solid $secondary-color;
+    // No borders, backgrounds, or shadows - seamless integration
+    margin-bottom: 0;
   }
 
   .factsheet-content {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: $text-color;
+    // Inherit line-height and font-size from page
 
     p {
-      margin: 0 0 $spacing-unit 0;
+      margin-bottom: $spacing-unit;
 
       &:last-child {
         margin-bottom: 0;
       }
     }
 
-    h3 {
-      color: $primary-color;
-      font-size: 1.25rem;
-      margin: $spacing-unit * 1.5 0 calc($spacing-unit / 2) 0;
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
-
-    ul, ol {
-      margin: 0 0 $spacing-unit 0;
+    ul,
+    ol {
+      margin-bottom: $spacing-unit;
       padding-left: $spacing-unit * 1.5;
     }
 
@@ -73,19 +38,810 @@ $spacing-unit: 1rem;
   }
 }
 
+// Scientific name subtitle (displayed under H1 when common name is used)
+.factsheet-subtitle {
+  margin-top: -0.5rem;
+  margin-bottom: $spacing-unit * 1.5;
+  font-size: 1.25rem;
+  // font-weight: 600;
+  line-height: 1.4;
+}
+
+// Conservation status section (text-based with heading)
+.conservation-status-section {
+  margin-bottom: $spacing-unit * 1.5;
+
+  .conservation-status {
+    display: flex;
+    flex-direction: column;
+    gap: calc($spacing-unit / 2);
+  }
+
+  .conservation-status-item {
+    margin-bottom: $spacing-unit;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .status-line {
+    margin-bottom: 0.25rem;
+  }
+
+  .status-text {
+    font-size: 1rem;
+  }
+
+  .status-act {
+    font-size: 0.875rem;
+  }
+}
+
+// Meta information - inside ntg-callout
+.ntg-callout {
+  .ntg-callout__content {
+    padding: 16px;
+    border-left-width: 6px;
+  }
+
+  .factsheet-meta {
+    p {
+      margin: 0.5rem 0;
+
+      strong {
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Loading state
+.factsheet-loading {
+  text-align: center;
+  padding: $spacing-unit * 3 $spacing-unit;
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto $spacing-unit;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid $primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    color: #6c757d;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Error state - Bootstrap alert style
+.factsheet-error {
+  padding: $spacing-unit;
+  margin-bottom: $spacing-unit;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.5rem 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Not found state - Bootstrap alert style
+.factsheet-not-found {
+  padding: $spacing-unit;
+  margin-bottom: $spacing-unit;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.5rem 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Sidebar Media Styles
+.factsheet-sidebar-media {
+  // Note: Heading styles (h2, h3) inherit from page defaults for consistency
+
+  .factsheet-pdf-button {
+    border-radius: 0;
+  }
+
+  .sidebar-image {
+    .sidebar-image-container {
+      width: 100%;
+      max-height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 350px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .sidebar-map {
+    img {
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+    }
+  }
+}
+
 // Responsive styles
 @media (max-width: 768px) {
-  .threatened-species-factsheet {
-    .factsheet-container {
-      padding: $spacing-unit;
+  .factsheet-sidebar-media {
+    margin-top: $spacing-unit * 2;
+  }
+}
+
+// Accordion accessibility styles
+.accordion {
+  .accordion-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    background-color: #fff;
+    border: 0;
+    overflow-anchor: none;
+    transition:
+      color 0.15s ease-in-out,
+      background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out,
+      border-radius 0.15s ease;
+
+    // Respect reduced motion preference
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
     }
 
-    .factsheet-title {
-      font-size: 1.5rem;
+    // Chevron icon pointing down
+    &::after {
+      flex-shrink: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-left: auto;
+      content: "";
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-size: 1.25rem;
+      transition: transform 0.2s ease-in-out;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
     }
 
-    .factsheet-content {
+    // Rotate chevron when expanded (not collapsed)
+    &:not(.collapsed)::after {
+      transform: rotate(-180deg);
+    }
+
+    &:hover {
+      z-index: 2;
+    }
+
+    // Ensure visible focus indicator
+    &:focus {
+      z-index: 3;
+      outline: 2px solid #005a9c;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.25);
+    }
+
+    // Use :focus-visible for modern browsers (keyboard focus only)
+    &:focus:not(:focus-visible) {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #005a9c;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.25);
+    }
+  }
+
+  .accordion-collapse {
+    overflow: hidden;
+    transition: height 0.3s ease;
+
+    // Respect reduced motion preference
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .accordion-body {
+    padding: 1rem 1.25rem;
+  }
+}
+
+// Print button styling
+.factsheet-print-button {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// Pagination controls in modal footer
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .page-indicator {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// Action buttons in modal footer
+.modal-footer {
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+// Modal print preview styles
+.print-preview {
+  background: #f5f5f5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 600px;
+  max-height: 80vh;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  .printable-factsheet {
+    width: 100%;
+    position: relative;
+    transform-origin: top center;
+
+    // Scale pages to fit in modal preview
+    @media (max-width: 1400px) {
+      transform: scale(0.85);
+    }
+
+    @media (max-width: 1200px) {
+      transform: scale(0.7);
+    }
+
+    @media (max-width: 992px) {
+      transform: scale(0.6);
+    }
+  }
+
+  // Page container - A4 dimensions with shadow
+  .page-container {
+    width: 21cm; // A4 width
+    height: 29.7cm; // A4 height (fixed height, not min-height)
+    padding: 1.5cm; // Margins
+    margin: 0 auto 2rem;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    page-break-after: always;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Page header with large title (first page only)
+  .print-page-header {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .print-title-large {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+  }
+
+  // Page header with smaller title (subsequent pages)
+  .print-page-header-small {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .print-title-small {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6c757d;
+  }
+
+  // Page content body
+  .page-content-body {
+    padding-bottom: 2.5cm; // Space for absolute footer
+
+    h1 {
+      font-size: 1.15rem;
+      margin-bottom: 0.4rem;
+      margin-top: 0.75rem;
+      color: #212529;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    h2 {
+      font-size: 1rem;
+      margin-bottom: 0.35rem;
+      color: #212529;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+      color: #212529;
+    }
+
+    p {
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    ul,
+    ol {
+      margin-bottom: 0.5rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  // Page footer with NT Government logo
+  .print-page-footer {
+    position: absolute;
+    bottom: 1.5cm;
+    left: 1.5cm;
+    right: 1.5cm;
+    padding-top: 0.5rem;
+    border-top: 1px solid #dee2e6;
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 0.65rem;
+      color: #6c757d;
+    }
+
+    .footer-left {
+      flex: 1;
+    }
+
+    .footer-department {
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+      font-size: 0.7rem;
+    }
+
+    .footer-meta {
+      font-size: 0.6rem;
+    }
+
+    .footer-right {
+      margin-left: 1rem;
+
+      .ntg-logo {
+        height: 1.8rem;
+        width: auto;
+      }
+    }
+  }
+
+  // Two-column layout for first page
+  .print-layout {
+    display: flex;
+    gap: 1.5rem;
+
+    .print-main-content {
+      flex: 1;
+      min-width: 0; // Prevent flex overflow
+    }
+
+    .print-sidebar {
+      flex: 0 0 6cm;
+      font-size: 0.8rem; // Smaller typography
+
+      h2 {
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .sidebar-image,
+      .sidebar-map {
+        margin-bottom: 0.75rem;
+
+        img {
+          border: 1px solid #dee2e6;
+          border-radius: 4px;
+        }
+      }
+
+      .small,
+      figcaption {
+        font-size: 0.7rem;
+        line-height: 1.3;
+      }
+
+      .sidebar-heading {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+
+      .sidebar-subheading {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .sidebar-content {
+        p {
+          margin-bottom: 0.4rem;
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+
+  .print-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.35rem;
+    color: #212529;
+    font-weight: 600;
+  }
+
+  .print-subtitle {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: #6c757d;
+  }
+
+  .print-section {
+    margin-bottom: 0.75rem;
+
+    h1 {
+      font-size: 1.15rem;
+      margin-bottom: 0.4rem;
+      color: #212529;
+    }
+
+    h2 {
+      font-size: 1rem;
+      margin-bottom: 0.35rem;
+      color: #212529;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+      color: #212529;
+    }
+
+    .section-content {
+      p {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+      }
+
+      ul,
+      ol {
+        margin-bottom: 0.5rem;
+        padding-left: 1.5rem;
+      }
+
+      li {
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
+
+  .conservation-status-item {
+    margin-bottom: 0.5rem;
+
+    .status-line {
       font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .status-act {
+      font-size: 0.75rem;
+      color: #6c757d;
+    }
+  }
+
+  .family-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// Print styles - ensure images are visible when printing/saving as PDF
+@media print {
+  // Hide modal chrome when printing from modal
+  .modal-header,
+  .modal-footer,
+  .btn-close {
+    display: none !important;
+  }
+
+  // Make modal content full width for print
+  .modal-dialog {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .modal-body {
+    padding: 0 !important;
+  }
+
+  // NT Government template format for print
+  .print-preview {
+    // Page setup
+    .printable-factsheet {
+      max-width: 100%;
+      padding: 0;
+    }
+
+    // Two-column layout for first page in print
+    .print-layout {
+      display: flex;
+      gap: 1.5cm;
+      page-break-after: always;
+
+      .print-sidebar {
+        flex: 0 0 6cm;
+      }
+    }
+
+    // Hide sidebar on subsequent pages (print only)
+    .print-full-content {
+      page-break-before: auto;
+    }
+
+    // NT Gov typography - Document Title (not a semantic heading)
+    .print-title {
+      font-family: "Lato Semibold", "Lato", sans-serif;
+      font-size: 20pt;
+      color: #000000 !important;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 8pt;
+      page-break-after: avoid;
+    }
+
+    .print-subtitle {
+      font-size: 14pt;
+      font-style: italic;
+      margin-bottom: 12pt;
+    }
+
+    // NT Gov typography - Section headings (H1, promoted from H2)
+    .print-section h1,
+    h1 {
+      font-family: "Lato Semibold", "Lato", sans-serif;
+      font-size: 18pt;
+      color: #f4551a !important;
+      font-weight: 600;
+      margin-top: 12pt;
+      margin-bottom: 10pt;
+      page-break-after: avoid;
+    }
+
+    // NT Gov typography - Subsection headings (H2, promoted from H3)
+    .print-section h2,
+    h2,
+    .sidebar-heading,
+    .sidebar-subheading {
+      font-family: "Lato Semibold", "Lato", sans-serif;
+      font-size: 16pt;
+      color: #008387 !important;
+      font-weight: 600;
+      margin-top: 10pt;
+      margin-bottom: 8pt;
+      page-break-after: avoid;
+    }
+
+    // NT Gov typography - Sub-subsection headings (H3, promoted from H4)
+    .print-section h3,
+    h3 {
+      font-family: "Lato Semibold", "Lato", sans-serif;
+      font-size: 14pt;
+      color: #343741 !important;
+      font-weight: 600;
+      margin-top: 10pt;
+      margin-bottom: 8pt;
+      page-break-after: avoid;
+    }
+
+    .section-content p,
+    p {
+      font-family: "Lato", sans-serif;
+      font-size: 11pt;
+      line-height: 1.3;
+      margin-top: 0;
+      margin-bottom: 10pt;
+    }
+
+    .section-content li,
+    li {
+      font-size: 11pt;
+      margin-bottom: 6pt;
+    }
+
+    // Sidebar smaller typography
+    .print-sidebar {
+      font-size: 9pt;
+
+      h2 {
+        font-size: 12pt !important;
+      }
+
+      p,
+      .sidebar-content {
+        font-size: 9pt;
+      }
+
+      figcaption,
+      .small {
+        font-size: 8pt;
+      }
+    }
+
+    .conservation-status-item {
+      .status-line {
+        font-size: 11pt;
+      }
+
+      .status-act {
+        font-size: 10pt;
+      }
+    }
+  }
+
+  // Page setup with margins for NT Gov template
+  @page {
+    size: A4 portrait;
+    margin: 39.7pt 39.7pt 39.7pt 39.7pt;
+  }
+
+  // Regular page print styles (non-modal)
+  // Make H1 available as a running header for all pages
+  body:not(.modal-open) h1 {
+    position: running(pageHeader);
+    color: #000000 !important;
+  }
+
+  // Ensure conservation status section prints correctly
+  .conservation-status-section {
+    display: block !important;
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
+
+  // Ensure callout is visible in print
+  .ntg-callout {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+
+  // Prevent accordion content from breaking across pages
+  .accordion-item {
+    page-break-inside: avoid;
+  }
+
+  // Hide Open all/Close all accordion toggle links
+  .accordion-toggler,
+  .ntg-accordion-toggler,
+  .factsheet-print-button {
+    display: none !important;
+  }
+
+  // Show accordion content when printing
+  .accordion-collapse[hidden] {
+    display: block !important;
+  }
+
+  // NT Government template color scheme for print (regular page)
+  body:not(.modal-open) {
+    h2 {
+      color: #f4551a !important;
+    }
+
+    h3,
+    .accordion-button {
+      color: #008387 !important;
     }
   }
 }
