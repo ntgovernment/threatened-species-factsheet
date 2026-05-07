@@ -30992,15 +30992,10 @@
             return `
   <figure class="sidebar-image mb-4">
     <div class="sidebar-image-container">
-      <div class="fotorama"
-           data-width="100%"
-           data-fit="contain"
-           data-nav="dots">
-           
+      <div class="fotorama">
         <img src="${e}" alt="${t}" loading="lazy" />      
         <img src="${e}" alt="${t}" loading="lazy" />
     </div>
-    ${r ? `<figcaption>${r}</figcaption>` : ""}
   </figure>
 `;
             // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
