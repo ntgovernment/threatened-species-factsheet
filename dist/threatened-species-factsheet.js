@@ -30973,6 +30973,15 @@
           renderSidebarMedia(A, t) {
             const e = `\n      <div class="factsheet-sidebar-media">\n        ${this.renderSidebarPDFButton()}\n        ${this.renderSidebarImage(A)}\n        ${this.renderSidebarMap(A)}\n        ${this.renderSidebarRelatedInfo(A)}\n      </div>\n    `;
             t.innerHTML = e;
+
+            // Initialise Fotorama AFTER HTML is in the DOM
+            if (window.jQuery && $.fn.fotorama) {
+              t.querySelectorAll(".fotorama").forEach((el) => {
+                if (!el.classList.contains("fotorama-initialized")) {
+                  $(el).fotorama();
+                }
+              });
+            }
           }
           renderSidebarPDFButton() {
             return '\n      <div class="mb-4 d-print-none">\n        <button type="button" class="btn ntg-btn btn-primary factsheet-pdf-button" id="openPrintModal">\n          <i class="fa-light fa-file-pdf me-2"></i>\n          Export to PDF\n        </button>\n      </div>\n    ';
@@ -30989,7 +30998,19 @@
               const t = A.image_credit.replace(/<[^>]*>/g, "").trim();
               r += `${r ? ". " : ""}Photo credit: ${this.escapeHtml(t)}`;
             }
-            return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
+            // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
+
+            return `
+  <figure class="sidebar-image mb-4">
+    <div class="sidebar-image-container">
+      <div class="fotorama" data-width="100%" data-ratio="16/9">
+        <img src="${e}" alt="${t}">
+         <img src="${e}" alt="${t}">
+      </div>
+    </div>
+    ${r ? `<figcaption>${r}</figcaption>` : ""}
+  </figure>
+`;
           }
           renderSidebarMap(A) {
             if (!A.taxon_id || !A.scientific_name) return "";
