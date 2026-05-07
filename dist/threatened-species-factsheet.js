@@ -30989,16 +30989,7 @@
               const t = A.image_credit.replace(/<[^>]*>/g, "").trim();
               r += `${r ? ". " : ""}Photo credit: ${this.escapeHtml(t)}`;
             }
-            return `
-  <figure class="sidebar-image mb-4">
-    <div class="sidebar-image-container">
-      <div class="fotorama">
-        <img src="${e}" alt="${t}" loading="lazy" />      
-        <img src="${e}" alt="${t}" loading="lazy" />
-    </div>
-  </figure>
-`;
-            // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
+            return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
           }
           renderSidebarMap(A) {
             if (!A.taxon_id || !A.scientific_name) return "";
