@@ -30974,14 +30974,14 @@
             const e = `\n      <div class="factsheet-sidebar-media">\n        ${this.renderSidebarPDFButton()}\n        ${this.renderSidebarImage(A)}\n        ${this.renderSidebarMap(A)}\n        ${this.renderSidebarRelatedInfo(A)}\n      </div>\n    `;
             t.innerHTML = e;
 
-            // Initialise Fotorama AFTER HTML is in the DOM
-            if (window.jQuery && $.fn.fotorama) {
-              t.querySelectorAll(".fotorama").forEach((el) => {
-                if (!el.classList.contains("fotorama-initialized")) {
-                  $(el).fotorama();
-                }
-              });
-            }
+            // // Initialise Fotorama AFTER HTML is in the DOM
+            // if (window.jQuery && $.fn.fotorama) {
+            //   t.querySelectorAll(".fotorama").forEach((el) => {
+            //     if (!el.classList.contains("fotorama-initialized")) {
+            //       $(el).fotorama();
+            //     }
+            //   });
+            // }
           }
           renderSidebarPDFButton() {
             return '\n      <div class="mb-4 d-print-none">\n        <button type="button" class="btn ntg-btn btn-primary factsheet-pdf-button" id="openPrintModal">\n          <i class="fa-light fa-file-pdf me-2"></i>\n          Export to PDF\n        </button>\n      </div>\n    ';
