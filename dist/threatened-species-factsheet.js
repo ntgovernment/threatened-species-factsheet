@@ -30937,8 +30937,8 @@
               let n = e.find(
                 (A) =>
                   "Fauna" === A.category &&
-                  A.common_name &&
-                  A.common_name.toLowerCase() === r,
+                  A.taxon_id &&
+                  A.taxon_id.toLowerCase() === r,
               );
               return (
                 n ||
