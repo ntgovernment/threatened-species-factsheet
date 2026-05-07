@@ -30943,9 +30943,7 @@
               return (
                 n ||
                   (n = e.find(
-                    (A) =>
-                      A.taxon_id &&
-                      A.taxon_id.toLowerCase() === r,
+                    (A) => A.taxon_id && A.taxon_id.toLowerCase() === r,
                   )),
                 n || null
               );
@@ -30991,11 +30989,25 @@
               const t = A.image_credit.replace(/<[^>]*>/g, "").trim();
               r += `${r ? ". " : ""}Photo credit: ${this.escapeHtml(t)}`;
             }
-            return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
+            return `
+  <figure class="sidebar-image mb-4">
+    <div class="sidebar-image-container">
+      <div class="fotorama"
+           data-width="100%"
+           data-fit="contain"
+           data-nav="dots">
+           
+        <img src="${e}" alt="${t}" loading="lazy" />      
+        <img src="${e}" alt="${t}" loading="lazy" />
+    </div>
+    ${r ? `<figcaption>${r}</figcaption>` : ""}
+  </figure>
+`;
+            // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
           }
           renderSidebarMap(A) {
-             if (!A.taxon_id || !A.scientific_name) return "";
-             return `\n      <figure class="sidebar-map mb-4">\n        <img src="https://nt.gov.au/_media/docs/environment/threatened-species/maps/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}.webp" \n             alt="Distribution map for ${this.escapeHtml(A.common_name || A.scientific_name)}" \n             class="img-fluid" \n             loading="lazy"\n             onerror="this.parentElement.style.display='none'" />\n        <figcaption>Known locations of ${A.common_name ? this.escapeHtml(A.common_name) : `<em>${this.escapeHtml(A.scientific_name)}</em>`} in the NT (<a href="http://nrmaps.nt.gov.au" target="_blank" rel="noopener noreferrer">nrmaps.nt.gov.au</a>)</figcaption>\n      </figure>\n    `; 
+            if (!A.taxon_id || !A.scientific_name) return "";
+            return `\n      <figure class="sidebar-map mb-4">\n        <img src="https://nt.gov.au/_media/docs/environment/threatened-species/maps/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}.webp" \n             alt="Distribution map for ${this.escapeHtml(A.common_name || A.scientific_name)}" \n             class="img-fluid" \n             loading="lazy"\n             onerror="this.parentElement.style.display='none'" />\n        <figcaption>Known locations of ${A.common_name ? this.escapeHtml(A.common_name) : `<em>${this.escapeHtml(A.scientific_name)}</em>`} in the NT (<a href="http://nrmaps.nt.gov.au" target="_blank" rel="noopener noreferrer">nrmaps.nt.gov.au</a>)</figcaption>\n      </figure>\n    `;
           }
           renderSidebarRelatedInfo(A) {
             return A.related_information
