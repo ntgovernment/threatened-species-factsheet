@@ -30973,15 +30973,6 @@
           renderSidebarMedia(A, t) {
             const e = `\n      <div class="factsheet-sidebar-media">\n        ${this.renderSidebarPDFButton()}\n        ${this.renderSidebarImage(A)}\n        ${this.renderSidebarMap(A)}\n        ${this.renderSidebarRelatedInfo(A)}\n      </div>\n    `;
             t.innerHTML = e;
-
-            // // Initialise Fotorama AFTER HTML is in the DOM
-            // if (window.jQuery && $.fn.fotorama) {
-            //   t.querySelectorAll(".fotorama").forEach((el) => {
-            //     if (!el.classList.contains("fotorama-initialized")) {
-            //       $(el).fotorama();
-            //     }
-            //   });
-            // }
           }
           renderSidebarPDFButton() {
             return '\n      <div class="mb-4 d-print-none">\n        <button type="button" class="btn ntg-btn btn-primary factsheet-pdf-button" id="openPrintModal">\n          <i class="fa-light fa-file-pdf me-2"></i>\n          Export to PDF\n        </button>\n      </div>\n    ';
@@ -31000,10 +30991,11 @@
             }
             // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
 
+            //testx
             return `
   <figure class="sidebar-image mb-4">
     <div class="sidebar-image-container">
-      <div class="fotorama" data-width="100%" data-ratio="16/9">
+      <div class="fotorama" data-auto="false">
         <img src="${e}" alt="${t}">
          <img src="${e}" alt="${t}">
       </div>
@@ -31585,6 +31577,26 @@
             const e = 0 === t ? A.length - 1 : t - 1;
             A[e]?.focus();
           }
+          // testx
+          initFotorama() {
+            if (
+              !window.jQuery ||
+              !window.jQuery.fn ||
+              !window.jQuery.fn.fotorama
+            ) {
+              return;
+            }
+
+            var galleries = document.querySelectorAll(".fotorama");
+
+            for (var i = 0; i < galleries.length; i++) {
+              var el = galleries[i];
+
+              if (!el.classList.contains("fotorama-initialized")) {
+                window.jQuery(el).fotorama();
+              }
+            }
+          }
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
@@ -31666,6 +31678,8 @@
               this.updatePageMetadata(r, n, t ? null : A.scientific_name);
             }
             this.populateSidebarNavigation(A);
+            // testx
+            this.initFotorama();
           }
         }
         const ge = Be;
