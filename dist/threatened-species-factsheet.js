@@ -31482,14 +31482,6 @@
                       ((A.style.display = "block"),
                         (A.style.visibility = "visible"));
                     });
-
-                    //testx
-                    const footerImg = doc.querySelector(".ntg-logo");
-                    if (footerImg) {
-                      footerImg.style.width = "120px";
-                      footerImg.style.maxWidth = "120px";
-                      footerImg.style.height = "auto";
-                    }
                   },
                 });
                 t.style.display = n;
