@@ -31003,7 +31003,7 @@
           <img src="${e1}" alt="${t}" loading="lazy"
                onerror="this.parentElement.parentElement.parentElement.style.display='none'">
           <img src="${e2}" alt="${t}" loading="lazy"
-               onerror="this.parentElement.style.display='none'">
+               onerror="this.parentElement.parentElement.parentElement.style.display='none'">
         </div>
       </div>
       ${r ? `<figcaption>${r}</figcaption>` : ""}
