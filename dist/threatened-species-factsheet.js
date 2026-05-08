@@ -30996,8 +30996,8 @@
   <figure class="sidebar-image mb-4">
     <div class="sidebar-image-container">
       <div class="fotorama" data-auto="false">
-        <img src="${e}" alt="${t}>
-         <img src="${e}" alt="${t}">
+        <img src="${e}" alt="${t}">
+        <img src="${e}" alt="${t}">
       </div>
     </div>
     ${r ? `<figcaption>${r}</figcaption>` : ""}
