@@ -30995,7 +30995,7 @@
             return `
   <figure class="sidebar-image mb-4">
     <div class="sidebar-image-container">
-      <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true">
+      <div class="fotorama" data-auto="false">
         <img src="${e}" alt="${t}>
          <img src="${e1}" alt="${t}">
       </div>
