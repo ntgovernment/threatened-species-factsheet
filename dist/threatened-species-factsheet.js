@@ -31001,10 +31001,8 @@
       <div class="sidebar-image-container">
         <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
 <img src="${e1}" alt="${t}" loading="lazy"
-     onload="this.closest('figure').dataset.hasImage = '1'"
      onerror="this.remove()">
 <img src="${e2}" alt="${t}" loading="lazy"
-     onload="this.closest('figure').dataset.hasImage = '1'"
      onerror="this.remove()">
         </div>
       </div>
@@ -31694,10 +31692,10 @@
               this.updatePageMetadata(r, n, t ? null : A.scientific_name);
             }
             this.populateSidebarNavigation(A);
-            //testx
-            this.hideEmptySidebarFigures();
             // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
+            //testx
+            this.hideEmptySidebarFigures();
           }
         }
         const ge = Be;
