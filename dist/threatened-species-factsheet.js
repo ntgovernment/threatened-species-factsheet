@@ -31583,50 +31583,32 @@
           }
           // initializes Fotorama galleries if the library is loaded
           initFotorama() {
-            if (!window.jQuery || !jQuery.fn || !jQuery.fn.fotorama) {
+            if (
+              !window.jQuery ||
+              !window.jQuery.fn ||
+              !window.jQuery.fn.fotorama
+            ) {
               return;
             }
 
-            const galleries = document.querySelectorAll(".fotorama");
+            var galleries = document.querySelectorAll(".fotorama");
 
-            galleries.forEach((el) => {
+            for (var i = 0; i < galleries.length; i++) {
+              var el = galleries[i];
+
               if (!el.classList.contains("fotorama-initialized")) {
-                jQuery(el).fotorama();
+                window.jQuery(el).fotorama();
               }
-            });
-
-            // After fotorama is built, decide if figure stays
-            jQuery(document)
-              .off("fotorama:ready.sidebar")
-              .on("fotorama:ready.sidebar", (e) => {
-                const fotorama = jQuery(e.target).data("fotorama");
-                const figure = e.target.closest("figure");
-
-                // If no valid images, remove the whole figure
-                if (figure && (!fotorama || fotorama.size === 0)) {
-                  figure.remove();
-                }
-              });
+            }
           }
-          // initFotorama() {
-          //   if (
-          //     !window.jQuery ||
-          //     !window.jQuery.fn ||
-          //     !window.jQuery.fn.fotorama
-          //   ) {
-          //     return;
-          //   }
-
-          //   var galleries = document.querySelectorAll(".fotorama");
-
-          //   for (var i = 0; i < galleries.length; i++) {
-          //     var el = galleries[i];
-
-          //     if (!el.classList.contains("fotorama-initialized")) {
-          //       window.jQuery(el).fotorama();
-          //     }
-          //   }
-          // }
+          //testx
+          hideEmptyFigCaptions() {
+  document.querySelectorAll("figure.sidebar-image").forEach(fig => {
+    if (!fig.querySelector("img")) {
+      fig.querySelector("figcaption")?.remove();
+    }
+  });
+}
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
@@ -31710,6 +31692,8 @@
             this.populateSidebarNavigation(A);
             // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
+            //testx
+            this.hideEmptyFigCaptions();
           }
         }
         const ge = Be;
