@@ -30981,6 +30981,7 @@
             if (!A.taxon_id || !A.scientific_name) return "";
             const t = this.escapeHtml(A.common_name || A.scientific_name),
               e = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo.webp`;
+              e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo1.webp`;
             let r = "";
             if (
               (A.common_name && (r = this.escapeHtml(A.common_name)),
@@ -30990,14 +30991,13 @@
               r += `${r ? ". " : ""}Photo credit: ${this.escapeHtml(t)}`;
             }
             // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
-
-            //testx
+            // added fotorama for multiple images
             return `
   <figure class="sidebar-image mb-4">
     <div class="sidebar-image-container">
-      <div class="fotorama" data-auto="false">
-        <img src="${e}" alt="${t}">
-         <img src="${e}" alt="${t}">
+      <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true">
+        <img src="${e}" alt="${t} loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
+         <img src="${e1}" alt="${t}" loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
       </div>
     </div>
     ${r ? `<figcaption>${r}</figcaption>` : ""}
@@ -31577,7 +31577,7 @@
             const e = 0 === t ? A.length - 1 : t - 1;
             A[e]?.focus();
           }
-          // testx
+          // initializes Fotorama galleries if the library is loaded
           initFotorama() {
             if (
               !window.jQuery ||
@@ -31678,7 +31678,7 @@
               this.updatePageMetadata(r, n, t ? null : A.scientific_name);
             }
             this.populateSidebarNavigation(A);
-            // testx
+            // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
           }
         }
