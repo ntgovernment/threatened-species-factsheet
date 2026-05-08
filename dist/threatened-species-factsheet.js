@@ -31604,7 +31604,9 @@
           //testx
           hideEmptyFigCaptions() {
             document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
-              if (!fig.querySelector("img")) {
+              const hasFotoramaImage = fig.querySelector(".fotorama__img");
+
+              if (!hasFotoramaImage) {
                 fig.querySelector("figcaption")?.remove();
               }
             });
