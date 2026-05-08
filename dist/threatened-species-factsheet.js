@@ -31000,13 +31000,16 @@
             <figure class="sidebar-image mb-4">
       <div class="sidebar-image-container">
         <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
-          <img src="${e1}" alt="${t}" loading="lazy" onerror="this.remove()">
-          <img src="${e2}" alt="${t}" loading="lazy" onerror="this.remove()">
+<img src="${e1}" alt="${t}" loading="lazy"
+     onload="this.closest('figure').dataset.hasImage = '1'"
+     onerror="this.remove()">
+<img src="${e2}" alt="${t}" loading="lazy"
+     onload="this.closest('figure').dataset.hasImage = '1'"
+     onerror="this.remove()">
         </div>
       </div>
       ${r ? `<figcaption>${r}</figcaption>` : ""}
-    </figure>
-            
+    </figure>       
             `;
           }
           renderSidebarMap(A) {
@@ -31606,7 +31609,7 @@
           hideEmptySidebarFigures() {
             document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
               if (!fig.querySelector("img")) {
-                fig.remove(); // ✅ hides whole figure
+                fig.remove();
               }
             });
           }
