@@ -31601,6 +31601,15 @@
               }
             }
           }
+
+          hideEmptyFigCaptions() {
+            document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
+              if (!fig.querySelector("img")) {
+                fig.querySelector("figcaption")?.remove();
+              }
+            });
+          }
+
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
@@ -31684,6 +31693,7 @@
             this.populateSidebarNavigation(A);
             // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
+            this.hideEmptyFigCaptions();
           }
         }
         const ge = Be;
