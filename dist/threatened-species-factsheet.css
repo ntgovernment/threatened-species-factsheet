@@ -144,6 +144,11 @@ h1:has(+ .factsheet-subtitle) {
 .factsheet-not-found p:last-child {
   margin-bottom: 0;
 }
+
+.sidebar-image .fotorama {
+  display: none;
+}
+
 .factsheet-sidebar-media .factsheet-pdf-button {
   border-radius: 0;
 }

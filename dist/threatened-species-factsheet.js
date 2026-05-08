@@ -31583,32 +31583,59 @@
           }
           // initializes Fotorama galleries if the library is loaded
           initFotorama() {
-            if (
-              !window.jQuery ||
-              !window.jQuery.fn ||
-              !window.jQuery.fn.fotorama
-            ) {
-              return;
-            }
+            if (!window.jQuery || !jQuery.fn || !jQuery.fn.fotorama) return;
 
-            var galleries = document.querySelectorAll(".fotorama");
+            const galleries = document.querySelectorAll(".fotorama");
 
-            for (var i = 0; i < galleries.length; i++) {
-              var el = galleries[i];
-
+            galleries.forEach((el) => {
               if (!el.classList.contains("fotorama-initialized")) {
-                window.jQuery(el).fotorama();
+                jQuery(el).fotorama();
               }
-            }
+            });
+            jQuery(document)
+              .off("fotorama:ready.sidebar")
+              .on("fotorama:ready.sidebar", (e) => {
+                const fig = e.target.closest("figure.sidebar-image");
+
+                if (!fig) return;
+
+                // If images exist → show gallery
+                const hasImg = fig.querySelector("img");
+
+                if (hasImg) {
+                  e.target.style.display = "";
+                } else {
+                  fig.remove();
+                }
+              });
           }
+          // initFotorama() {
+          //   if (
+          //     !window.jQuery ||
+          //     !window.jQuery.fn ||
+          //     !window.jQuery.fn.fotorama
+          //   ) {
+          //     return;
+          //   }
+
+          //   var galleries = document.querySelectorAll(".fotorama");
+
+          //   for (var i = 0; i < galleries.length; i++) {
+          //     var el = galleries[i];
+
+          //     if (!el.classList.contains("fotorama-initialized")) {
+          //       window.jQuery(el).fotorama();
+          //     }
+          //   }
+          // }
           //testx
           hideEmptyFigCaptions() {
-  document.querySelectorAll("figure.sidebar-image").forEach(fig => {
-    if (!fig.querySelector("img")) {
-      fig.querySelector("figcaption")?.remove();
-    }
-  });
-}
+            document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
+              if (!fig.querySelector("img")) {
+                fig.querySelector("figcaption")?.remove();
+              }
+            });
+          }
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
