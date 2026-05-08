@@ -30981,7 +30981,7 @@
             if (!A.taxon_id || !A.scientific_name) return "";
             const t = this.escapeHtml(A.common_name || A.scientific_name),
               e = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo.webp`;
-              e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo1.webp`;
+              //e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo1.webp`;
             let r = "";
             if (
               (A.common_name && (r = this.escapeHtml(A.common_name)),
