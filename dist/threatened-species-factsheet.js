@@ -30997,46 +30997,35 @@
             }
             // added fotorama for multiple images
             return `
-    <figure class="sidebar-image mb-4">
-      <div class="sidebar-image-container">
-        <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
-          <img src="${e1}" alt="${t}" loading="lazy"
-               onerror="this.parentElement.parentElement.style.display='none'">
-          <img src="${e2}" alt="${t}" loading="lazy"
-               onerror="this.parentElement.parentElement.style.display='none'">
-        </div>
-      </div>
-      ${r ? `<figcaption>${r}</figcaption>` : ""}
-    </figure>
+<figure class="sidebar-image mb-4" data-img-errors="0">
+  <div class="sidebar-image-container">
+    <div class="fotorama"
+         data-auto="false"
+         data-loop="true"
+         data-keyboard="true"
+         data-nav="thumbs">
+
+      <img src="${e1}" alt="${t}" loading="lazy"
+           onerror="
+             const fig = this.closest('figure');
+             fig.dataset.imgErrors++;
+             this.remove();
+             if (fig.dataset.imgErrors >= 2) fig.remove();
+           ">
+
+      <img src="${e2}" alt="${t}" loading="lazy"
+           onerror="
+             const fig = this.closest('figure');
+             fig.dataset.imgErrors++;
+             this.remove();
+             if (fig.dataset.imgErrors >= 2) fig.remove();
+           ">
+    </div>
+  </div>
+  ${r ? `<figcaption>${r}</figcaption>` : ""}
+</figure>
   `;
           }
-          //           renderSidebarImage(A) {
-          //             if (!A.taxon_id || !A.scientific_name) return "";
-          //             const t = this.escapeHtml(A.common_name || A.scientific_name);
-          //               e = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo.webp`;
-          //               //e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}_photo1.webp`;
-          //             let r = "";
-          //             if (
-          //               (A.common_name && (r = this.escapeHtml(A.common_name)),
-          //               A.image_credit)
-          //             ) {
-          //               const t = A.image_credit.replace(/<[^>]*>/g, "").trim();
-          //               r += `${r ? ". " : ""}Photo credit: ${this.escapeHtml(t)}`;
-          //             }
-          //             // return `\n      <figure class="sidebar-image mb-4">\n        <div class="sidebar-image-container">\n          <img src="${e}" \n               alt="${t}" \n               loading="lazy"\n               onerror="this.parentElement.parentElement.style.display='none'" />\n        </div>\n        ${r ? `<figcaption>${r}</figcaption>` : ""}\n      </figure>\n    `;
-          //             // added fotorama for multiple images
-          //             return `
-          //   <figure class="sidebar-image mb-4">
-          //     <div class="sidebar-image-container">
-          //       <div class="fotorama" data-auto="false">
-          //         <img src="${e}" alt="${t}">
-          //         <img src="${e}" alt="${t}">
-          //       </div>
-          //     </div>
-          //     ${r ? `<figcaption>${r}</figcaption>` : ""}
-          //   </figure>
-          // `;
-          //         }
           renderSidebarMap(A) {
             if (!A.taxon_id || !A.scientific_name) return "";
             return `\n      <figure class="sidebar-map mb-4">\n        <img src="https://nt.gov.au/_media/docs/environment/threatened-species/maps/${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}.webp" \n             alt="Distribution map for ${this.escapeHtml(A.common_name || A.scientific_name)}" \n             class="img-fluid" \n             loading="lazy"\n             onerror="this.parentElement.style.display='none'" />\n        <figcaption>Known locations of ${A.common_name ? this.escapeHtml(A.common_name) : `<em>${this.escapeHtml(A.scientific_name)}</em>`} in the NT (<a href="http://nrmaps.nt.gov.au" target="_blank" rel="noopener noreferrer">nrmaps.nt.gov.au</a>)</figcaption>\n      </figure>\n    `;
