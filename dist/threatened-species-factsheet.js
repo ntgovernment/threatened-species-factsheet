@@ -31592,20 +31592,19 @@
                 jQuery(el).fotorama();
               }
             });
+
             jQuery(document)
               .off("fotorama:ready.sidebar")
               .on("fotorama:ready.sidebar", (e) => {
                 const fig = e.target.closest("figure.sidebar-image");
-
                 if (!fig) return;
 
-                // If images exist → show gallery
                 const hasImg = fig.querySelector("img");
 
                 if (hasImg) {
                   e.target.style.display = "";
                 } else {
-                  fig.remove();
+                  e.target.style.display = "none";
                 }
               });
           }
