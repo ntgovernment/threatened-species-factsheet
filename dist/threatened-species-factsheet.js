@@ -30999,7 +30999,7 @@
             return `
     <figure class="sidebar-image mb-4">
       <div class="sidebar-image-container">
-        <div class="fotorama" data-auto="false">
+        <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true">
           <img src="${e1}" alt="${t}" loading="lazy"
                onerror="this.parentElement.parentElement.style.display='none'">
           <img src="${e2}" alt="${t}" loading="lazy"
