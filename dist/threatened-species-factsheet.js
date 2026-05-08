@@ -30997,25 +30997,15 @@
             }
             // added fotorama for multiple images
             return `
-                        <figure class="sidebar-image mb-4" data-errors="0">
+                        <figure class="sidebar-image mb-4">
                   <div class="sidebar-image-container">
                     <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
 <img src="${e1}"
            alt="${t}"
-           loading="lazy"
-           onerror="
-             const fig = this.closest('figure');
-             fig.dataset.errors = Number(fig.dataset.errors) + 1;
-             this.remove();
-           ">
+           loading="lazy">
            <img src="${e2}"
            alt="${t}"
-           loading="lazy"
-           onerror="
-             const fig = this.closest('figure');
-             fig.dataset.errors = Number(fig.dataset.errors) + 1;
-             this.remove();
-           ">
+           loading="lazy">
                     </div>
                   </div>
                   ${r ? `<figcaption>${r}</figcaption>` : ""}
@@ -31615,15 +31605,6 @@
               }
             }
           }
-          hideFigCaptionWhenAllImagesFail() {
-            document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
-              // We know we rendered exactly 2 images
-              if (Number(fig.dataset.errors) === 2) {
-                fig.querySelector("figcaption")?.remove();
-              }
-            });
-          }
-
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
@@ -31707,7 +31688,6 @@
             this.populateSidebarNavigation(A);
             // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
-            this.hideFigCaptionWhenAllImagesFail();
           }
         }
         const ge = Be;
