@@ -30977,6 +30977,7 @@
           renderSidebarPDFButton() {
             return '\n      <div class="mb-4 d-print-none">\n        <button type="button" class="btn ntg-btn btn-primary factsheet-pdf-button" id="openPrintModal">\n          <i class="fa-light fa-file-pdf me-2"></i>\n          Export to PDF\n        </button>\n      </div>\n    ';
           }
+
           renderSidebarImage(A) {
             if (!A.taxon_id || !A.scientific_name) return "";
 
@@ -31386,7 +31387,7 @@
             const t = document.createElement("div");
             return (
               (t.className = "print-page-footer"),
-              (t.innerHTML = `\n      <div class="footer-content">\n        <div class="footer-left">\n          <div class="footer-department">Department of Environment, Parks and Water Security</div>\n          <div class="footer-meta">February 2026 | Page ${A}</div>\n        </div>\n        <div class="footer-right">\n          <img src="https://nt.gov.au/cdn/images/logos/logo-ntg-color.svg" alt="Northern Territory Government" class="ntg-logo" />\n        </div>\n      </div>\n    `),
+              (t.innerHTML = `\n      <div class="footer-content">\n        <div class="footer-left">\n          <div class="footer-department">Department of Lands, Planning and Environment</div>\n          <div class="footer-meta">February 2026 | Page ${A}</div>\n        </div>\n        <div class="footer-right">\n          <img src="https://nt.gov.au/cdn/images/logos/logo-ntg-color.svg" alt="Northern Territory Government" class="ntg-logo" />\n        </div>\n      </div>\n    `),
               t
             );
           }
@@ -31481,6 +31482,14 @@
                       ((A.style.display = "block"),
                         (A.style.visibility = "visible"));
                     });
+
+                    //testx
+                    const footerImg = doc.querySelector(".ntg-logo");
+                    if (footerImg) {
+                      footerImg.style.width = "120px";
+                      footerImg.style.maxWidth = "120px";
+                      footerImg.style.height = "auto";
+                    }
                   },
                 });
                 t.style.display = n;
