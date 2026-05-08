@@ -30997,11 +30997,25 @@
             }
             // added fotorama for multiple images
             return `
-                        <figure class="sidebar-image mb-4">
+                        <figure class="sidebar-image mb-4" data-errors="0">
                   <div class="sidebar-image-container">
                     <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
-            <img src="${e1}" alt="${t}" loading="lazy" onerror="this.remove()">
-            <img src="${e2}" alt="${t}" loading="lazy" onerror="this.remove()">
+<img src="${e1}"
+           alt="${t}"
+           loading="lazy"
+           onerror="
+             const fig = this.closest('figure');
+             fig.dataset.errors = Number(fig.dataset.errors) + 1;
+             this.remove();
+           ">
+           <img src="${e2}"
+           alt="${t}"
+           loading="lazy"
+           onerror="
+             const fig = this.closest('figure');
+             fig.dataset.errors = Number(fig.dataset.errors) + 1;
+             this.remove();
+           ">
                     </div>
                   </div>
                   ${r ? `<figcaption>${r}</figcaption>` : ""}
@@ -31601,10 +31615,10 @@
               }
             }
           }
-
-          hideEmptyFigCaptions() {
+          hideFigCaptionWhenAllImagesFail() {
             document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
-              if (!fig.querySelector("img")) {
+              // We know we rendered exactly 2 images
+              if (Number(fig.dataset.errors) === 2) {
                 fig.querySelector("figcaption")?.remove();
               }
             });
@@ -31693,7 +31707,7 @@
             this.populateSidebarNavigation(A);
             // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
-            this.hideEmptyFigCaptions();
+            this.hideFigCaptionWhenAllImagesFail();
           }
         }
         const ge = Be;
