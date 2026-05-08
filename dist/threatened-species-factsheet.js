@@ -31581,52 +31581,26 @@
             const e = 0 === t ? A.length - 1 : t - 1;
             A[e]?.focus();
           }
-          // initializes Fotorama galleries if the library is loaded
+          //initializes Fotorama galleries if the library is loaded
           initFotorama() {
-            if (!window.jQuery || !jQuery.fn || !jQuery.fn.fotorama) return;
+            if (
+              !window.jQuery ||
+              !window.jQuery.fn ||
+              !window.jQuery.fn.fotorama
+            ) {
+              return;
+            }
 
-            const galleries = document.querySelectorAll(".fotorama");
+            var galleries = document.querySelectorAll(".fotorama");
 
-            galleries.forEach((el) => {
+            for (var i = 0; i < galleries.length; i++) {
+              var el = galleries[i];
+
               if (!el.classList.contains("fotorama-initialized")) {
-                jQuery(el).fotorama();
+                window.jQuery(el).fotorama();
               }
-            });
-
-            jQuery(document)
-              .off("fotorama:ready.sidebar")
-              .on("fotorama:ready.sidebar", (e) => {
-                const fig = e.target.closest("figure.sidebar-image");
-                if (!fig) return;
-
-                const hasImg = fig.querySelector("img");
-
-                if (hasImg) {
-                  e.target.style.display = "";
-                } else {
-                  e.target.style.display = "none";
-                }
-              });
+            }
           }
-          // initFotorama() {
-          //   if (
-          //     !window.jQuery ||
-          //     !window.jQuery.fn ||
-          //     !window.jQuery.fn.fotorama
-          //   ) {
-          //     return;
-          //   }
-
-          //   var galleries = document.querySelectorAll(".fotorama");
-
-          //   for (var i = 0; i < galleries.length; i++) {
-          //     var el = galleries[i];
-
-          //     if (!el.classList.contains("fotorama-initialized")) {
-          //       window.jQuery(el).fotorama();
-          //     }
-          //   }
-          // }
           //testx
           hideEmptyFigCaptions() {
             document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
