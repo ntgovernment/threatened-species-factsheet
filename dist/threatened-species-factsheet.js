@@ -31000,8 +31000,8 @@
                         <figure class="sidebar-image mb-4">
                   <div class="sidebar-image-container">
                     <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
-            <img src="${e1}" alt="${t}" loading="lazy">
-            <img src="${e2}" alt="${t}" loading="lazy">
+            <img src="${e1}" alt="${t}" loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
+            <img src="${e2}" alt="${t}" loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
                     </div>
                   </div>
                   ${r ? `<figcaption>${r}</figcaption>` : ""}
@@ -31601,16 +31601,6 @@
               }
             }
           }
-          //testx
-          hideEmptyFigCaptions() {
-            document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
-              const hasFotoramaImage = fig.querySelector(".fotorama__img");
-
-              if (!hasFotoramaImage) {
-                fig.querySelector("figcaption")?.remove();
-              }
-            });
-          }
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
@@ -31694,8 +31684,6 @@
             this.populateSidebarNavigation(A);
             // call initFotorama after content is rendered to ensure galleries are initialized correctly
             this.initFotorama();
-            //testx
-            this.hideEmptyFigCaptions();
           }
         }
         const ge = Be;
