@@ -30996,51 +30996,17 @@
               r += `${r ? ". " : ""}Photo credit: ${this.escapeHtml(credit)}`;
             }
             // added fotorama for multiple images
-
             return `
-    <figure class="sidebar-image mb-4"
-            data-has-image="0"
-            style="display:none">
-      <div class="sidebar-image-container">
-        <div class="fotorama"
-             data-auto="false"
-             data-loop="true"
-             data-keyboard="true"
-             data-nav="thumbs">
-
-          <img src="${e1}" alt="${t}" loading="lazy"
-               onload="
-                 const f = this.closest('figure');
-                 f.dataset.hasImage = '1';
-                 f.style.display = '';
-               "
-               onerror="this.remove()">
-
-          <img src="${e2}" alt="${t}" loading="lazy"
-               onload="
-                 const f = this.closest('figure');
-                 f.dataset.hasImage = '1';
-                 f.style.display = '';
-               "
-               onerror="this.remove()">
-        </div>
-      </div>
-      ${r ? `<figcaption>${r}</figcaption>` : ""}
-    </figure>
-  `;
-            //             return `
-            //             <figure class="sidebar-image mb-4">
-            //       <div class="sidebar-image-container">
-            //         <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
-            // <img src="${e1}" alt="${t}" loading="lazy"
-            //      onerror="this.remove()">
-            // <img src="${e2}" alt="${t}" loading="lazy"
-            //      onerror="this.remove()">
-            //         </div>
-            //       </div>
-            //       ${r ? `<figcaption>${r}</figcaption>` : ""}
-            //     </figure>
-            //             `;
+                        <figure class="sidebar-image mb-4">
+                  <div class="sidebar-image-container">
+                    <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
+            <img src="${e1}" alt="${t}" loading="lazy">
+            <img src="${e2}" alt="${t}" loading="lazy">
+                    </div>
+                  </div>
+                  ${r ? `<figcaption>${r}</figcaption>` : ""}
+                </figure>
+                        `;
           }
           renderSidebarMap(A) {
             if (!A.taxon_id || !A.scientific_name) return "";
@@ -31617,41 +31583,50 @@
           }
           // initializes Fotorama galleries if the library is loaded
           initFotorama() {
-            if (
-              !window.jQuery ||
-              !window.jQuery.fn ||
-              !window.jQuery.fn.fotorama
-            ) {
+            if (!window.jQuery || !jQuery.fn || !jQuery.fn.fotorama) {
               return;
             }
 
-            var galleries = document.querySelectorAll(".fotorama");
+            const galleries = document.querySelectorAll(".fotorama");
 
-            for (var i = 0; i < galleries.length; i++) {
-              var el = galleries[i];
-
+            galleries.forEach((el) => {
               if (!el.classList.contains("fotorama-initialized")) {
-                window.jQuery(el).fotorama();
-              }
-            }
-
-            //textx
-
-            window
-              .jQuery(document)
-              .off("fotorama:ready.sidebar")
-              .on("fotorama:ready.sidebar", () => {
-                this.hideEmptySidebarFigures();
-              });
-          }
-          //testx
-          hideEmptySidebarFigures() {
-            document.querySelectorAll("figure.sidebar-image").forEach((fig) => {
-              if (fig.dataset.hasImage !== "1") {
-                fig.remove();
+                jQuery(el).fotorama();
               }
             });
+
+            // After fotorama is built, decide if figure stays
+            jQuery(document)
+              .off("fotorama:ready.sidebar")
+              .on("fotorama:ready.sidebar", (e) => {
+                const fotorama = jQuery(e.target).data("fotorama");
+                const figure = e.target.closest("figure");
+
+                // If no valid images, remove the whole figure
+                if (figure && (!fotorama || fotorama.size === 0)) {
+                  figure.remove();
+                }
+              });
           }
+          // initFotorama() {
+          //   if (
+          //     !window.jQuery ||
+          //     !window.jQuery.fn ||
+          //     !window.jQuery.fn.fotorama
+          //   ) {
+          //     return;
+          //   }
+
+          //   var galleries = document.querySelectorAll(".fotorama");
+
+          //   for (var i = 0; i < galleries.length; i++) {
+          //     var el = galleries[i];
+
+          //     if (!el.classList.contains("fotorama-initialized")) {
+          //       window.jQuery(el).fotorama();
+          //     }
+          //   }
+          // }
           generateFactsheetHTML(A) {
             this.escapeHtml(A.scientific_name || "Unknown Species");
             const t = (A, t, e, r = "") => {
