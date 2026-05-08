@@ -30997,34 +30997,19 @@
             }
             // added fotorama for multiple images
             return `
-<figure class="sidebar-image mb-4" data-img-errors="0">
-  <div class="sidebar-image-container">
-    <div class="fotorama"
-         data-auto="false"
-         data-loop="true"
-         data-keyboard="true"
-         data-nav="thumbs">
-
-      <img src="${e1}" alt="${t}" loading="lazy"
-           onerror="
-             const fig = this.closest('figure');
-             fig.dataset.imgErrors++;
-             this.remove();
-             if (fig.dataset.imgErrors >= 2) fig.remove();
-           ">
-
-      <img src="${e2}" alt="${t}" loading="lazy"
-           onerror="
-             const fig = this.closest('figure');
-             fig.dataset.imgErrors++;
-             this.remove();
-             if (fig.dataset.imgErrors >= 2) fig.remove();
-           ">
-    </div>
-  </div>
-  ${r ? `<figcaption>${r}</figcaption>` : ""}
-</figure>
-  `;
+            <figure class="sidebar-image mb-4">
+      <div class="sidebar-image-container">
+        <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
+          <img src="${e1}" alt="${t}" loading="lazy"
+               onerror="this.parentElement.parentElement.style.display='none'">
+          <img src="${e2}" alt="${t}" loading="lazy"
+               onerror="this.parentElement.style.display='none'">
+        </div>
+      </div>
+      ${r ? `<figcaption>${r}</figcaption>` : ""}
+    </figure>
+            
+            `;
           }
           renderSidebarMap(A) {
             if (!A.taxon_id || !A.scientific_name) return "";
