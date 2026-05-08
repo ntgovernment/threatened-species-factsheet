@@ -30985,7 +30985,7 @@
             const baseName = `${A.scientific_name.replace(/\s+/g, "_")}_${A.taxon_id}`;
 
             const e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo.webp`;
-            const e2 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo2.webp`;
+            const e2 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo1.webp`;
 
             let r = "";
             if (
