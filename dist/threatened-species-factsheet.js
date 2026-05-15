@@ -31701,7 +31701,7 @@
                 t.showLoading();
                 const A = t.getSpeciesFromUrl(),
                   e = await t.fetchSpeciesData(A);
-                  console.log(
+                console.log(
                   "Asset items:",
                   document.querySelectorAll(".asset-item"),
                 );
@@ -31715,14 +31715,12 @@
                     ? t.showNotFound(A)
                     : t.showError("No species data available");
 
-                console.log(
-                  "Asset items:",
-                  document.querySelectorAll(".asset-item"),
-                );
-                console.log(
-                  "Count:",
-                  document.querySelectorAll(".asset-item").length,
-                );
+                setTimeout(() => {
+                  console.log(
+                    "After:",
+                    document.querySelectorAll(".asset-item").length,
+                  );
+                }, 500);
               } catch (A) {
                 (console.error("Failed to load species data:", A),
                   t.showError(
