@@ -31701,6 +31701,14 @@
                 t.showLoading();
                 const A = t.getSpeciesFromUrl(),
                   e = await t.fetchSpeciesData(A);
+                  console.log(
+                  "Asset items:",
+                  document.querySelectorAll(".asset-item"),
+                );
+                console.log(
+                  "Count:",
+                  document.querySelectorAll(".asset-item").length,
+                );
                 e
                   ? t.update(e)
                   : A
