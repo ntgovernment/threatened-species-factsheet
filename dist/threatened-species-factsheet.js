@@ -31706,6 +31706,15 @@
                   : A
                     ? t.showNotFound(A)
                     : t.showError("No species data available");
+
+                console.log(
+                  "Asset items:",
+                  document.querySelectorAll(".asset-item"),
+                );
+                console.log(
+                  "Count:",
+                  document.querySelectorAll(".asset-item").length,
+                );
               } catch (A) {
                 (console.error("Failed to load species data:", A),
                   t.showError(
