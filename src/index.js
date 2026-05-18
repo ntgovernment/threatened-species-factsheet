@@ -205,7 +205,7 @@ class ThreatenedSpeciesFactsheet {
                   <div class="sidebar-image-container">
                     <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
 <img src="${e1}"
-           alt="${t}"
+           alt="${altText}"
            loading="lazy">
            <img src="${e2}"
            alt="${altText}"
