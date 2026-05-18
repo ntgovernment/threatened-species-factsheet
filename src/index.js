@@ -48,7 +48,7 @@ class ThreatenedSpeciesFactsheet {
    * @param {string|null} scientificName - Species name to search for (common name for fauna, scientific name for flora), or null for first species
    * @returns {Promise<Object|null>} Species data object or null if not found
    */
-  async fetchSpeciesData(scientificName = null) {
+  async fetchSpeciesData(taxonID = null) {
     try {
       const response = await fetch(this.apiUrl);
       if (!response.ok) {
@@ -60,28 +60,27 @@ class ThreatenedSpeciesFactsheet {
         throw new Error("Invalid API response");
       }
 
-      // If no scientific name provided, return first species
-      if (!scientificName) {
+      // If no taxon ID provided, return first species
+      if (!taxonID) {
         return data[0];
       }
 
       // Case-insensitive search for species
-      const speciesLower = scientificName.toLowerCase();
+      const speciesLower = taxonID.toLowerCase();
 
       // First, try matching by common_name (for fauna)
       let foundSpecies = data.find(
         (species) =>
           species.category === "Fauna" &&
-          species.common_name &&
-          species.common_name.toLowerCase() === speciesLower,
+          species.taxon_id &&
+          species.taxon_id.toLowerCase() === speciesLower,
       );
 
       // If not found by common name, try matching by scientific_name (fallback for fauna or primary search for flora)
       if (!foundSpecies) {
         foundSpecies = data.find(
           (species) =>
-            species.scientific_name &&
-            species.scientific_name.toLowerCase() === speciesLower,
+            species.taxon_id && species.taxon_id.toLowerCase() === speciesLower,
         );
       }
 
@@ -178,13 +177,15 @@ class ThreatenedSpeciesFactsheet {
    * @returns {string} HTML for species image
    */
   renderSidebarImage(data) {
-    if (!data.scientific_name) {
+    if (!data.scientific_name || !data.taxon_id) {
       return "";
     }
 
     const altText = this.escapeHtml(data.common_name || data.scientific_name);
-    const imageFilename = data.scientific_name.replace(/\s+/g, "-");
-    const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
+    const baseName = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
+
+    const e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo.webp`;
+    const e2 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo1.webp`;
 
     // Build figcaption with optional photo credit
     let figcaptionText = "";
@@ -200,16 +201,20 @@ class ThreatenedSpeciesFactsheet {
     }
 
     return `
-      <figure class="sidebar-image mb-4">
-        <div class="sidebar-image-container">
-          <img src="${imagePath}" 
-               alt="${altText}" 
-               loading="lazy"
-               onerror="this.parentElement.parentElement.style.display='none'" />
-        </div>
-        ${figcaptionText ? `<figcaption>${figcaptionText}</figcaption>` : ""}
-      </figure>
-    `;
+                        <figure class="sidebar-image mb-4">
+                  <div class="sidebar-image-container">
+                    <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
+<img src="${e1}"
+           alt="${t}"
+           loading="lazy">
+           <img src="${e2}"
+           alt="${t}"
+           loading="lazy">
+                    </div>
+                  </div>
+                  ${r ? `<figcaption>${r}</figcaption>` : ""}
+                </figure>
+                        `;
   }
 
   /**
@@ -218,12 +223,12 @@ class ThreatenedSpeciesFactsheet {
    * @returns {string} HTML for distribution map
    */
   renderSidebarMap(data) {
-    if (!data.scientific_name) {
+    if (!data.scientific_name || !data.taxon_id) {
       return "";
     }
 
     // Always derive map filename from scientific_name (spaces to hyphens, add .webp extension)
-    const mapFilename = `${data.scientific_name.replace(/\s+/g, "-")}.webp`;
+    const mapFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}.webp`;
     const mapPath = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${mapFilename}`;
     const altText = `Distribution map for ${this.escapeHtml(data.common_name || data.scientific_name)}`;
 
@@ -560,10 +565,10 @@ class ThreatenedSpeciesFactsheet {
 
     // Helper to render sidebar image
     const renderSidebarImage = () => {
-      if (!data.scientific_name) return "";
+      if (!data.scientific_name || !data.taxon_id) return "";
 
       const altText = this.escapeHtml(commonName || data.scientific_name);
-      const imageFilename = data.scientific_name.replace(/\s+/g, "-");
+      const imageFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
       const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
 
       let figcaptionText = "";
@@ -591,10 +596,10 @@ class ThreatenedSpeciesFactsheet {
 
     // Helper to render sidebar map
     const renderSidebarMap = () => {
-      if (!data.scientific_name) return "";
+      if (!data.scientific_name || !data.taxon_id) return "";
 
-      // Always derive map filename from scientific_name (spaces to hyphens, add .webp extension)
-      const mapFilename = `${data.scientific_name.replace(/\s+/g, "-")}.webp`;
+      // Always derive map filename from scientific_name (spaces to underscores, add taxon_id and .webp extension)
+      const mapFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}.webp`;
       const mapPath = `https://nt.gov.au/_media/docs/environment/threatened-species/maps/${mapFilename}`;
       const altText = `Distribution map for ${this.escapeHtml(commonName || data.scientific_name)}`;
       const speciesName = commonName
@@ -1410,6 +1415,23 @@ class ThreatenedSpeciesFactsheet {
     buttons[prevIndex]?.focus();
   }
 
+  //initializes Fotorama galleries if the library is loaded
+  initFotorama() {
+    if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.fotorama) {
+      return;
+    }
+
+    var galleries = document.querySelectorAll(".fotorama");
+
+    for (var i = 0; i < galleries.length; i++) {
+      var el = galleries[i];
+
+      if (!el.classList.contains("fotorama-initialized")) {
+        window.jQuery(el).fotorama();
+      }
+    }
+  }
+
   generateFactsheetHTML(data) {
     const escapedScientificName = this.escapeHtml(
       data.scientific_name || "Unknown Species",
@@ -1626,6 +1648,8 @@ class ThreatenedSpeciesFactsheet {
 
     // Update sidebar with media instead of navigation
     this.populateSidebarNavigation(data);
+    // call initFotorama after content is rendered to ensure galleries are initialized correctly
+    this.initFotorama();
   }
 }
 
