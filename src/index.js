@@ -66,21 +66,21 @@ class ThreatenedSpeciesFactsheet {
       }
 
       // Case-insensitive search for species
-      const speciesLower = taxonID.toLowerCase();
+      //const speciesLower = taxonID.toLowerCase();
 
       // First, try matching by common_name (for fauna)
       let foundSpecies = data.find(
         (species) =>
           species.category === "Fauna" &&
           species.taxon_id &&
-          species.taxon_id.toLowerCase() === speciesLower,
+          species.taxon_id.toLowerCase() === taxonID,
       );
 
       // If not found by common name, try matching by scientific_name (fallback for fauna or primary search for flora)
       if (!foundSpecies) {
         foundSpecies = data.find(
           (species) =>
-            species.taxon_id && species.taxon_id.toLowerCase() === speciesLower,
+            species.taxon_id && species.taxon_id === taxonID,
         );
       }
 
