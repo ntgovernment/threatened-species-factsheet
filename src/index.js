@@ -208,11 +208,11 @@ class ThreatenedSpeciesFactsheet {
            alt="${t}"
            loading="lazy">
            <img src="${e2}"
-           alt="${t}"
+           alt="${altText}"
            loading="lazy">
                     </div>
                   </div>
-                  ${r ? `<figcaption>${r}</figcaption>` : ""}
+                  ${figcaptionText? `<figcaption>${r}</figcaption>` : ""}
                 </figure>
                         `;
   }
