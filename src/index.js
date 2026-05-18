@@ -73,7 +73,7 @@ class ThreatenedSpeciesFactsheet {
         (species) =>
           species.category === "Fauna" &&
           species.taxon_id &&
-          species.taxon_id.toLowerCase() === taxonID,
+          species.taxon_id === taxonID,
       );
 
       // If not found by common name, try matching by scientific_name (fallback for fauna or primary search for flora)
