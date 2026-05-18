@@ -212,7 +212,7 @@ class ThreatenedSpeciesFactsheet {
            loading="lazy">
                     </div>
                   </div>
-                  ${figcaptionText? `<figcaption>${r}</figcaption>` : ""}
+                  ${figcaptionText? `<figcaption>${figcaptionText}</figcaption>` : ""}
                 </figure>
                         `;
   }
