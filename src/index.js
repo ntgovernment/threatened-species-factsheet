@@ -729,12 +729,6 @@ class ThreatenedSpeciesFactsheet {
       html += `</div></section>`;
     }
 
-    // Description with family name
-    // const familyNameHtml = data.family_name
-    //   ? `<p class="family-name">Family: ${this.escapeHtml(data.family_name)}</p>`
-    //   : "";
-    // html += renderSection("Description", data.description, familyNameHtml);
-
     // All remaining sections as continuous flow
     html += renderSection("Distribution", data.distribution);
     html += renderSection(
@@ -1597,18 +1591,7 @@ class ThreatenedSpeciesFactsheet {
 
     // Content sections
     html += `<div class="factsheet-content">`;
-
-    // Family name prepended to Description section
-    const familyNameHtml = data.family_name
-      ? `<p class="family-name">Family: ${this.escapeHtml(data.family_name)}</p>`
-      : "";
-    html += renderSection(
-      "Description",
-      data.description,
-      "description",
-      familyNameHtml,
-    );
-
+  
     // Accordion sections (Distribution to References)
     const accordionId = "accordion-" + Date.now();
     html += `
