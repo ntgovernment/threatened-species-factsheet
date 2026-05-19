@@ -214,12 +214,17 @@ class ThreatenedSpeciesFactsheet {
     const images = data.images || [];
 
     const imageHtml = images
+      .filter((img) => /_photo\d*\.webp$/i.test(img.url))
+      .sort((a, b) => {
+        const getIndex = (url) => {
+          const m = url.match(/_photo(\d*)\.webp$/i);
+          return m ? (m[1] ? parseInt(m[1], 10) : 0) : 999;
+        };
+        return getIndex(a.url) - getIndex(b.url);
+      })
       .map(
         (img) => `
-    <img 
-      src="${img.url}" 
-      alt="${altText}" 
-      loading="lazy">
+    <img src="${img.url}" alt="${altText}" loading="lazy">
   `,
       )
       .join("");
@@ -244,9 +249,11 @@ class ThreatenedSpeciesFactsheet {
                       ${imageHtml}
                     </div>
                   </div>
-                 ${(figcaptionText && images.length > 0)
-  ? `<figcaption>${figcaptionText}</figcaption>`
-  : ""}
+                 ${
+                   figcaptionText && images.length > 0
+                     ? `<figcaption>${figcaptionText}</figcaption>`
+                     : ""
+                 }
                 </figure>
                         `;
   }
@@ -894,9 +901,11 @@ class ThreatenedSpeciesFactsheet {
                       .cloneNode(true);
                     const layout = document.createElement("div");
                     layout.className = "print-layout";
-                    currentPageContent.insertAdjacentElement("afterbegin", sidebar);
+                    currentPageContent.insertAdjacentElement(
+                      "afterbegin",
+                      sidebar,
+                    );
                     layout.appendChild(currentPageContent);
-                    
 
                     const pageWrapper = document.createElement("div");
                     pageWrapper.className = "page-container";
@@ -1592,11 +1601,7 @@ class ThreatenedSpeciesFactsheet {
     // Content sections
     html += `<div class="factsheet-content">`;
 
-    html += renderSection(
-      "Description",
-      data.description,
-      "description"
-    );
+    html += renderSection("Description", data.description, "description");
 
     // Accordion sections (Distribution to References)
     const accordionId = "accordion-" + Date.now();
