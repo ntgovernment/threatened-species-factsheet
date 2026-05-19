@@ -1591,7 +1591,13 @@ class ThreatenedSpeciesFactsheet {
 
     // Content sections
     html += `<div class="factsheet-content">`;
-  
+
+    html += renderSection(
+      "Description",
+      data.description,
+      "description"
+    );
+
     // Accordion sections (Distribution to References)
     const accordionId = "accordion-" + Date.now();
     html += `
