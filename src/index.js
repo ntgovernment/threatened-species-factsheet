@@ -730,10 +730,10 @@ class ThreatenedSpeciesFactsheet {
     }
 
     // Description with family name
-    const familyNameHtml = data.family_name
-      ? `<p class="family-name">Family: ${this.escapeHtml(data.family_name)}</p>`
-      : "";
-    html += renderSection("Description", data.description, familyNameHtml);
+    // const familyNameHtml = data.family_name
+    //   ? `<p class="family-name">Family: ${this.escapeHtml(data.family_name)}</p>`
+    //   : "";
+    // html += renderSection("Description", data.description, familyNameHtml);
 
     // All remaining sections as continuous flow
     html += renderSection("Distribution", data.distribution);
