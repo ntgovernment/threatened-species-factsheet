@@ -898,7 +898,7 @@ class ThreatenedSpeciesFactsheet {
                       .cloneNode(true);
                     const layout = document.createElement("div");
                     layout.className = "print-layout";
-                    layout.appendChild(sidebar);
+                    currentPageContent.appendChild(sidebar);
                     layout.appendChild(currentPageContent);
                     
 
