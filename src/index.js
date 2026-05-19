@@ -697,6 +697,13 @@ class ThreatenedSpeciesFactsheet {
     // Main content column - ALL content sections go here for pagination
     html += `<div class="print-main-content">`;
 
+    // Sidebar column (appears on first page only)
+    html += `<aside class="print-sidebar">`;
+    html += renderSidebarImage();
+    html += renderSidebarMap();
+    html += renderSidebarRelatedInfo();
+    html += `</aside>`;
+
     // Conservation status
     if (data.conservation_status_nt || data.conservation_status_australia) {
       html += `<section class="print-section conservation-status-section conservation-status-alert">`;
@@ -741,13 +748,6 @@ class ThreatenedSpeciesFactsheet {
 
     // Close main content column
     html += `</div>`;
-
-    // Sidebar column (appears on first page only)
-    html += `<aside class="print-sidebar">`;
-    html += renderSidebarImage();
-    html += renderSidebarMap();
-    html += renderSidebarRelatedInfo();
-    html += `</aside>`;
 
     // Close two-column layout
     html += `</div>`;
@@ -898,8 +898,9 @@ class ThreatenedSpeciesFactsheet {
                       .cloneNode(true);
                     const layout = document.createElement("div");
                     layout.className = "print-layout";
-                    layout.appendChild(currentPageContent);
                     layout.appendChild(sidebar);
+                    layout.appendChild(currentPageContent);
+                    
 
                     const pageWrapper = document.createElement("div");
                     pageWrapper.className = "page-container";
