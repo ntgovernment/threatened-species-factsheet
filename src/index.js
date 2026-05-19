@@ -79,8 +79,7 @@ class ThreatenedSpeciesFactsheet {
       // If not found by common name, try matching by scientific_name (fallback for fauna or primary search for flora)
       if (!foundSpecies) {
         foundSpecies = data.find(
-          (species) =>
-            species.taxon_id && species.taxon_id === taxonID,
+          (species) => species.taxon_id && species.taxon_id === taxonID,
         );
       }
 
@@ -111,6 +110,35 @@ class ThreatenedSpeciesFactsheet {
     } catch (error) {
       console.error("Error fetching species list:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Fetch images for a species from Matrix endpoint
+   * @param {string} species - Scientific name of the species used to filter images
+   * @returns {Promise<Array<{url: string, name: string}>>}
+   * Array of image objects containing URL and file name, or empty array if none found
+   */
+  async fetchImages(species) {
+    try {
+      const url = `https://nt.gov.au/environment/dev/threatened-species-folder/configuration/listing/images2/_nocache?species=${encodeURIComponent(species)}`;
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid image response");
+      }
+
+      return data;
+    } catch (err) {
+      console.error("Error fetching images:", err);
+      return [];
     }
   }
 
@@ -212,7 +240,7 @@ class ThreatenedSpeciesFactsheet {
            loading="lazy">
                     </div>
                   </div>
-                  ${figcaptionText? `<figcaption>${figcaptionText}</figcaption>` : ""}
+                  ${figcaptionText ? `<figcaption>${figcaptionText}</figcaption>` : ""}
                 </figure>
                         `;
   }
@@ -569,7 +597,7 @@ class ThreatenedSpeciesFactsheet {
 
       const altText = this.escapeHtml(commonName || data.scientific_name);
       const imageFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
-      const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}.webp`;
+      const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}_photo.webp`;
 
       let figcaptionText = "";
       if (commonName) {
@@ -1669,15 +1697,18 @@ if (typeof window !== "undefined") {
       try {
         factsheet.showLoading();
 
-        const speciesName = factsheet.getSpeciesFromUrl();
+        const taxonID = factsheet.getSpeciesFromUrl();
 
         // Fetch and display current species
-        const speciesData = await factsheet.fetchSpeciesData(speciesName);
+        const speciesData = await factsheet.fetchSpeciesData(taxonID);
 
         if (speciesData) {
+          speciesData.images = await factsheet.fetchImages(taxonID);
+          //test
+          console.log("Fetched species data:", speciesData);
           factsheet.update(speciesData);
-        } else if (speciesName) {
-          factsheet.showNotFound(speciesName);
+        } else if (taxonID) {
+          factsheet.showNotFound(taxonID);
         } else {
           factsheet.showError("No species data available");
         }
