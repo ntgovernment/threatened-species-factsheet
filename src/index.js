@@ -240,11 +240,14 @@ class ThreatenedSpeciesFactsheet {
     return `
                         <figure class="sidebar-image mb-4">
                   <div class="sidebar-image-container">
-                    <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
+                    <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs"  data-width="100%">
                       ${imageHtml}
                     </div>
                   </div>
-                  ${figcaptionText ? `<figcaption>${figcaptionText}</figcaption>` : ""}
+                 ${(figcaptionText && images.length > 0)
+  ? `<figcaption>${figcaptionText}</figcaption>`
+  : ""}
+``
                 </figure>
                         `;
   }
@@ -600,8 +603,8 @@ class ThreatenedSpeciesFactsheet {
       if (!data.scientific_name || !data.taxon_id) return "";
 
       const altText = this.escapeHtml(commonName || data.scientific_name);
-      const imageFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
-      const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}_photo.webp`;
+      //const imageFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
+      //const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}_photo.webp`;
 
       let figcaptionText = "";
       if (commonName) {
@@ -616,7 +619,7 @@ class ThreatenedSpeciesFactsheet {
 
       return `
         <figure class="sidebar-image mb-3">
-          <img src="${imagePath}" 
+          <img src="${data.images[0].url}" 
                alt="${altText}" 
                class="img-fluid"
                style="max-width: 100%; height: auto;"
