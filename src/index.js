@@ -247,7 +247,6 @@ class ThreatenedSpeciesFactsheet {
                  ${(figcaptionText && images.length > 0)
   ? `<figcaption>${figcaptionText}</figcaption>`
   : ""}
-``
                 </figure>
                         `;
   }
