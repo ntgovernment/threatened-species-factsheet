@@ -551,7 +551,7 @@ h1:has(+ .factsheet-subtitle) {
     }
 
     .print-sidebar {
-      flex: 0 0 6cm;
+      float: right;
       font-size: 0.8rem; // Smaller typography
 
       h2 {
