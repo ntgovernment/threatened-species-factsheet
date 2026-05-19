@@ -210,10 +210,19 @@ class ThreatenedSpeciesFactsheet {
     }
 
     const altText = this.escapeHtml(data.common_name || data.scientific_name);
-    const baseName = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
 
-    const e1 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo.webp`;
-    const e2 = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${baseName}_photo1.webp`;
+    const images = data.images || [];
+
+    const imageHtml = images
+      .map(
+        (img) => `
+    <img 
+      src="${img.url}" 
+      alt="${altText}" 
+      loading="lazy">
+  `,
+      )
+      .join("");
 
     // Build figcaption with optional photo credit
     let figcaptionText = "";
@@ -232,12 +241,7 @@ class ThreatenedSpeciesFactsheet {
                         <figure class="sidebar-image mb-4">
                   <div class="sidebar-image-container">
                     <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs">
-<img src="${e1}"
-           alt="${altText}"
-           loading="lazy">
-           <img src="${e2}"
-           alt="${altText}"
-           loading="lazy">
+                      ${imageHtml}
                     </div>
                   </div>
                   ${figcaptionText ? `<figcaption>${figcaptionText}</figcaption>` : ""}
@@ -1704,8 +1708,6 @@ if (typeof window !== "undefined") {
 
         if (speciesData) {
           speciesData.images = await factsheet.fetchImages(taxonID);
-          //test
-          console.log("Fetched species data:", speciesData);
           factsheet.update(speciesData);
         } else if (taxonID) {
           factsheet.showNotFound(taxonID);
