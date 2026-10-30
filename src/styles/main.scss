@@ -253,8 +253,12 @@ h1:has(+ .factsheet-subtitle) {
     position: relative;
     display: flex;
     align-items: center;
-    width: 100%;
-    padding: 1rem 1.25rem 1rem 0;
+    width: calc(100% + 1.25rem);
+    margin-left: -1.25rem;
+    padding: 1rem 1.25rem;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
     text-align: left;
     background-color: #fff;
     border: 0;

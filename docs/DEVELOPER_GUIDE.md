@@ -163,7 +163,7 @@ Note: The printable modal preview title uses `common_name || scientific_name` by
 Important details:
 
 - Conservation status is not accordion-based.
-- Accordion toggle labels use H2 headings and have no left padding.
+- Accordion toggle labels use H2 headings. A negative left margin offsets the button padding so the label aligns with the other content.
 - Australia appears before Northern Territory.
 - Status items use semantic `role="status"` markup and `data-severity`.
 - `.status-text` matches the NT.GOV.AU screen `h3` font size (`22px`) without changing its markup.

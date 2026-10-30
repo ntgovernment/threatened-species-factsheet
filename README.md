@@ -124,7 +124,7 @@ Flora `common_name` values may exist in data, but they are intentionally ignored
 
 The top-level Conservation status block is rendered as an info-style alert and appears above the Description section.
 
-Accordion section labels are rendered as H2 headings, with no left padding on the toggle buttons.
+Accordion section labels are rendered as H2 headings. The toggle buttons use a negative left margin to align their text with the other content.
 
 Current behavior includes:
 
