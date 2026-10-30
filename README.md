@@ -124,6 +124,8 @@ Flora `common_name` values may exist in data, but they are intentionally ignored
 
 The top-level Conservation status block is rendered as an info-style alert and appears above the Description section.
 
+Accordion section labels are rendered as H2 headings, with no left padding on the toggle buttons.
+
 Current behavior includes:
 
 - Australia is listed before Northern Territory when both statuses exist.

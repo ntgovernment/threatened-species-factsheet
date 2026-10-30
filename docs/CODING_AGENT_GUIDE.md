@@ -36,6 +36,7 @@ Do not violate these without explicit instruction:
    - `generateFactsheetHTML()` for the main page
    - `generatePrintableHTML()` for the modal preview and PDF source
 10. Preserve the Conservation status section near the top of the factsheet and keep it readable in both page and printable views.
+11. Keep accordion toggle labels in H2 headings and remove left padding from the toggle buttons.
 
 ## Code Hotspots
 

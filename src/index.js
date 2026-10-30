@@ -1520,11 +1520,11 @@ class ThreatenedSpeciesFactsheet {
       const renderedContent = this.renderContent(content, this.allowHtml);
       return `
         <div class="accordion-item border-0 border-bottom">
-          <h3 class="accordion-header my-0" id="heading-${id}">
+          <h2 class="accordion-header my-0" id="heading-${id}">
             <button class="accordion-button rounded-0 collapsed" type="button" id="btn-${id}" aria-expanded="false" aria-controls="panel-${id}">
               ${this.escapeHtml(title)}
             </button>
-          </h3>
+          </h2>
           <div id="panel-${id}" role="region" aria-labelledby="btn-${id}" class="accordion-collapse d-print-block" hidden>
             <div class="accordion-body">
               ${prependContent}
