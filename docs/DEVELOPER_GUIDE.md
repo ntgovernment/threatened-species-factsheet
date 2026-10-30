@@ -165,7 +165,7 @@ Important details:
 - Conservation status is not accordion-based.
 - Australia appears before Northern Territory.
 - Status items use semantic `role="status"` markup and `data-severity`.
-- `.status-text` is intentionally stronger than surrounding body copy.
+- `.status-text` matches the NT.GOV.AU screen `h3` font size (`22px`) without changing its markup.
 
 ### Printable and Modal Path
 

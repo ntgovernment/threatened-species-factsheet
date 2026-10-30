@@ -65,6 +65,8 @@ High-risk areas:
 - print-preview rules
 - `@media print` rules
 
+The screen `.status-text` should match the NT.GOV.AU `h3` font size (`22px`); preserve its status markup when changing its typography.
+
 ## Required Pre-Edit Checks
 
 Before any edits:

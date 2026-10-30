@@ -129,7 +129,7 @@ Current behavior includes:
 - Australia is listed before Northern Territory when both statuses exist.
 - Main factsheet status items use semantic `role="status"` markup.
 - Printable preview uses a simplified paragraph version of the same information.
-- `.status-text` is intentionally larger and stronger than regular body text.
+- `.status-text` uses the NT.GOV.AU `h3` font size (`22px`) while retaining its status-text markup.
 
 ## Host Page Contract
 
