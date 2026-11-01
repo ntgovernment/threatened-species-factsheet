@@ -337,7 +337,8 @@ h1:has(+ .factsheet-subtitle) {
   }
 
   .accordion-body {
-    padding: 1rem 1.25rem;
+    margin-left: 4px;
+    padding: 1rem 1.25rem 1rem 4px;
   }
 }
 
