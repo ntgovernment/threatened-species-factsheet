@@ -253,9 +253,9 @@ h1:has(+ .factsheet-subtitle) {
     position: relative;
     display: flex;
     align-items: center;
-    width: calc(100% + 1.25rem);
-    margin-left: -1.25rem;
-    padding: 1rem 1.25rem;
+    width: calc(100% + 4px);
+    margin-left: -4px;
+    padding: 1rem 1.25rem 1rem 4px;
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
@@ -337,8 +337,7 @@ h1:has(+ .factsheet-subtitle) {
   }
 
   .accordion-body {
-    margin-left: 4px;
-    padding: 1rem 1.25rem 1rem 4px;
+    padding: 1rem 1.25rem 1rem 0;
   }
 }
 
