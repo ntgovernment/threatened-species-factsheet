@@ -1105,7 +1105,7 @@ class ThreatenedSpeciesFactsheet {
     footer.innerHTML = `
       <div class="footer-content">
         <div class="footer-left">
-          <div class="footer-department">Department of Environment, Parks and Water Security</div>
+          <div class="footer-department">Department of Lands, Planning and Environment</div>
           <div class="footer-meta">February 2026 | Page ${pageNumber}</div>
         </div>
         <div class="footer-right">
