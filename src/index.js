@@ -1106,7 +1106,6 @@ class ThreatenedSpeciesFactsheet {
     const dateLabel =
       updatedDate && !Number.isNaN(updatedDate.getTime())
         ? updatedDate.toLocaleDateString("en-AU", {
-            day: "numeric",
             month: "long",
             timeZone: "UTC",
             year: "numeric",
