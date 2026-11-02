@@ -477,7 +477,7 @@ class ThreatenedSpeciesFactsheet {
   /**
    * Open print preview modal
    */
-  openPrintModal() {
+  async openPrintModal() {
     // Check if modal already exists
     let modalElement = document.getElementById("factsheet-print-modal");
 
@@ -495,7 +495,7 @@ class ThreatenedSpeciesFactsheet {
     }
 
     // Initialize pagination
-    this.initializePagination(modalElement);
+    await this.initializePagination(modalElement);
 
     // Initialize and show Bootstrap modal
     if (typeof window.bootstrap !== "undefined" && window.bootstrap.Modal) {
@@ -797,12 +797,11 @@ class ThreatenedSpeciesFactsheet {
    * Initialize pagination for modal preview
    * @param {HTMLElement} modalElement - Modal DOM element
    */
-  initializePagination(modalElement) {
+  async initializePagination(modalElement) {
     const continuousContent = modalElement.querySelector("#continuous-content");
     if (!continuousContent) return;
 
-    // Calculate page breaks based on content height
-    this.calculatePageBreaks(continuousContent);
+    await this.calculatePageBreaks(continuousContent);
 
     const pages = modalElement.querySelectorAll(".page-container");
     this.totalPages = pages.length;
@@ -810,292 +809,281 @@ class ThreatenedSpeciesFactsheet {
 
     // Show first page, hide others
     pages.forEach((page, index) => {
-      if (index === 0) {
-        page.style.display = "block";
-      } else {
-        page.style.display = "none";
-      }
+      page.style.display = index === 0 ? "block" : "none";
     });
 
-    // Update page indicator
     this.updatePageIndicator();
     this.updateNavigationButtons();
   }
 
   /**
-   * Calculate page breaks based on character count with word-based breaking
+   * Paginate by measuring real layout so each page is filled to the footer.
    * @param {HTMLElement} contentElement - Continuous content element
    */
-  calculatePageBreaks(contentElement) {
-    // Character limits: 1000 for page 1 (sidebar), 2400 for pages 2+
-    const MAX_CHARS_PAGE_1 = 1000;
-    const MAX_CHARS_OTHER_PAGES = 2400;
+  async calculatePageBreaks(contentElement) {
+    const first = contentElement.querySelector(".print-page-first");
+    const mainContent = first?.querySelector(".print-main-content");
+    if (!first || !mainContent) return;
 
-    // Get the first page wrapper
-    const topLevelChildren = Array.from(contentElement.children);
-    const pages = [];
-    let pageNumber = 1;
-    let speciesTitle = "";
+    const speciesTitle = first.getAttribute("data-species-title") || "";
+    const headerTemplate = first.querySelector(".print-page-header");
+    const sidebarTemplate = first.querySelector(".print-sidebar");
 
-    topLevelChildren.forEach((topChild) => {
-      if (topChild.classList.contains("print-page-first")) {
-        speciesTitle = topChild.getAttribute("data-species-title") || "";
-
-        // Extract all content from the main content column
-        const mainContent = topChild.querySelector(".print-main-content");
-        if (!mainContent) return;
-
-        const allElements = [];
-        const sections = Array.from(mainContent.children);
-
-        sections.forEach((section) => {
-          const heading = section.querySelector("h1");
-          const content = section.querySelector(".section-content");
-
-          if (heading) {
-            allElements.push({
-              type: "heading",
-              element: heading.cloneNode(true),
-            });
-          }
-
-          if (content) {
-            Array.from(content.children).forEach((child) => {
-              allElements.push({
-                type: "content",
-                element: child.cloneNode(true),
-              });
-            });
-          }
+    // Flatten sections into headings and content blocks
+    const queue = [];
+    Array.from(mainContent.children).forEach((section) => {
+      const heading = section.querySelector("h1");
+      const content = section.querySelector(".section-content");
+      if (heading) {
+        queue.push({ type: "heading", element: heading.cloneNode(true) });
+      }
+      if (content) {
+        Array.from(content.children).forEach((child) => {
+          queue.push({ type: "content", element: child.cloneNode(true) });
         });
-
-        // Build pages with word-based breaking
-        let isFirstPage = true;
-        let currentPageContent = document.createElement("div");
-        currentPageContent.className = "page-content-body";
-        let currentCharCount = 0;
-
-        for (let i = 0; i < allElements.length; i++) {
-          const item = allElements[i];
-          const elementText = item.element.textContent || "";
-          const elementCharCount = elementText.length;
-          const maxChars = isFirstPage
-            ? MAX_CHARS_PAGE_1
-            : MAX_CHARS_OTHER_PAGES;
-
-          // Check if element fits in current page
-          if (
-            currentCharCount === 0 ||
-            currentCharCount + elementCharCount <= maxChars
-          ) {
-            // Element fits entirely
-            currentPageContent.appendChild(item.element);
-            currentCharCount += elementCharCount;
-          } else {
-            // Element doesn't fit - try word-based splitting for content elements
-            if (item.type === "content" && currentCharCount > 0) {
-              const remainingChars = maxChars - currentCharCount;
-              const words = elementText.split(/\s+/);
-              let partialText = "";
-              let partialCharCount = 0;
-
-              // Find how many words fit on current page
-              for (let w = 0; w < words.length; w++) {
-                const wordWithSpace = (w > 0 ? " " : "") + words[w];
-                if (partialCharCount + wordWithSpace.length <= remainingChars) {
-                  partialText += wordWithSpace;
-                  partialCharCount += wordWithSpace.length;
-                } else {
-                  break;
-                }
-              }
-
-              // If we can fit at least some words on current page
-              if (partialText.trim()) {
-                const partialElement = item.element.cloneNode(true);
-                partialElement.textContent = partialText;
-                currentPageContent.appendChild(partialElement);
-
-                // Create remaining text for next page
-                const remainingText = elementText
-                  .substring(partialText.length)
-                  .trim();
-                if (remainingText) {
-                  // Save current page
-                  if (isFirstPage) {
-                    // First page: include sidebar
-                    const pageHeader = topChild
-                      .querySelector(".print-page-header")
-                      .cloneNode(true);
-                    const sidebar = topChild
-                      .querySelector(".print-sidebar")
-                      .cloneNode(true);
-                    const layout = document.createElement("div");
-                    layout.className = "print-layout";
-                    currentPageContent.insertAdjacentElement(
-                      "afterbegin",
-                      sidebar,
-                    );
-                    layout.appendChild(currentPageContent);
-
-                    const pageWrapper = document.createElement("div");
-                    pageWrapper.className = "page-container";
-                    pageWrapper.setAttribute(
-                      "data-page",
-                      pageNumber.toString(),
-                    );
-                    pageWrapper.appendChild(pageHeader);
-                    pageWrapper.appendChild(layout);
-                    pageWrapper.appendChild(this.createPageFooter(pageNumber));
-                    pages.push(pageWrapper);
-                    pageNumber++;
-                    isFirstPage = false;
-                  } else {
-                    pages.push(
-                      this.createPageWithHeaderFooter(
-                        pageNumber,
-                        speciesTitle,
-                        currentPageContent,
-                      ),
-                    );
-                    pageNumber++;
-                  }
-
-                  // Start new page with remaining text
-                  currentPageContent = document.createElement("div");
-                  currentPageContent.className = "page-content-body";
-                  const remainingElement = item.element.cloneNode(true);
-                  remainingElement.textContent = remainingText;
-                  currentPageContent.appendChild(remainingElement);
-                  currentCharCount = remainingText.length;
-                }
-              } else {
-                // Can't fit any words on current page - start new page
-                if (currentPageContent.childNodes.length > 0) {
-                  if (isFirstPage) {
-                    const pageHeader = topChild
-                      .querySelector(".print-page-header")
-                      .cloneNode(true);
-                    const sidebar = topChild
-                      .querySelector(".print-sidebar")
-                      .cloneNode(true);
-                    const layout = document.createElement("div");
-                    layout.className = "print-layout";
-                    layout.appendChild(currentPageContent);
-                    layout.appendChild(sidebar);
-
-                    const pageWrapper = document.createElement("div");
-                    pageWrapper.className = "page-container";
-                    pageWrapper.setAttribute(
-                      "data-page",
-                      pageNumber.toString(),
-                    );
-                    pageWrapper.appendChild(pageHeader);
-                    pageWrapper.appendChild(layout);
-                    pageWrapper.appendChild(this.createPageFooter(pageNumber));
-                    pages.push(pageWrapper);
-                    pageNumber++;
-                    isFirstPage = false;
-                  } else {
-                    pages.push(
-                      this.createPageWithHeaderFooter(
-                        pageNumber,
-                        speciesTitle,
-                        currentPageContent,
-                      ),
-                    );
-                    pageNumber++;
-                  }
-                }
-
-                currentPageContent = document.createElement("div");
-                currentPageContent.className = "page-content-body";
-                currentPageContent.appendChild(item.element);
-                currentCharCount = elementCharCount;
-              }
-            } else {
-              // Heading or first element - start new page
-              if (currentPageContent.childNodes.length > 0) {
-                if (isFirstPage) {
-                  const pageHeader = topChild
-                    .querySelector(".print-page-header")
-                    .cloneNode(true);
-                  const sidebar = topChild
-                    .querySelector(".print-sidebar")
-                    .cloneNode(true);
-                  const layout = document.createElement("div");
-                  layout.className = "print-layout";
-                  layout.appendChild(currentPageContent);
-                  layout.appendChild(sidebar);
-
-                  const pageWrapper = document.createElement("div");
-                  pageWrapper.className = "page-container";
-                  pageWrapper.setAttribute("data-page", pageNumber.toString());
-                  pageWrapper.appendChild(pageHeader);
-                  pageWrapper.appendChild(layout);
-                  pageWrapper.appendChild(this.createPageFooter(pageNumber));
-                  pages.push(pageWrapper);
-                  pageNumber++;
-                  isFirstPage = false;
-                } else {
-                  pages.push(
-                    this.createPageWithHeaderFooter(
-                      pageNumber,
-                      speciesTitle,
-                      currentPageContent,
-                    ),
-                  );
-                  pageNumber++;
-                }
-              }
-
-              currentPageContent = document.createElement("div");
-              currentPageContent.className = "page-content-body";
-              currentPageContent.appendChild(item.element);
-              currentCharCount = elementCharCount;
-            }
-          }
-        }
-
-        // Add last page if it has content
-        if (currentPageContent.childNodes.length > 0) {
-          if (isFirstPage) {
-            const pageHeader = topChild
-              .querySelector(".print-page-header")
-              .cloneNode(true);
-            const sidebar = topChild
-              .querySelector(".print-sidebar")
-              .cloneNode(true);
-            const layout = document.createElement("div");
-            layout.className = "print-layout";
-            layout.appendChild(currentPageContent);
-            layout.appendChild(sidebar);
-
-            const pageWrapper = document.createElement("div");
-            pageWrapper.className = "page-container";
-            pageWrapper.setAttribute("data-page", pageNumber.toString());
-            pageWrapper.appendChild(pageHeader);
-            pageWrapper.appendChild(layout);
-            pageWrapper.appendChild(this.createPageFooter(pageNumber));
-            pages.push(pageWrapper);
-          } else {
-            pages.push(
-              this.createPageWithHeaderFooter(
-                pageNumber,
-                speciesTitle,
-                currentPageContent,
-              ),
-            );
-          }
-        }
       }
     });
 
-    // Replace content with pages
-    contentElement.innerHTML = "";
-    pages.forEach((page) => {
-      contentElement.appendChild(page);
-    });
+    // Sidebar image heights depend on load state
+    await this.waitForImages(first);
+
+    // Off-screen host so page CSS (scoped under .print-preview) applies
+    const host = document.createElement("div");
+    host.className = "print-preview";
+    host.style.cssText =
+      "position:absolute;left:-10000px;top:0;visibility:hidden;width:21cm;min-height:0;max-height:none;overflow:visible;padding:0;display:block;";
+    const stage = document.createElement("div");
+    stage.className = "printable-factsheet";
+    stage.style.transform = "none";
+    host.appendChild(stage);
+    document.body.appendChild(host);
+
+    const pages = [];
+    const bodyContent = (body) =>
+      Array.from(body.children).filter((el) => !el.matches(".print-sidebar"));
+
+    const createPage = (pageNumber) => {
+      const body = document.createElement("div");
+      body.className = "page-content-body";
+      let page;
+      if (pageNumber === 1) {
+        if (sidebarTemplate) body.appendChild(sidebarTemplate.cloneNode(true));
+        const layout = document.createElement("div");
+        layout.className = "print-layout";
+        layout.appendChild(body);
+        page = document.createElement("div");
+        page.className = "page-container";
+        page.setAttribute("data-page", "1");
+        if (headerTemplate) page.appendChild(headerTemplate.cloneNode(true));
+        page.appendChild(layout);
+        page.appendChild(this.createPageFooter(1));
+      } else {
+        page = this.createPageWithHeaderFooter(pageNumber, speciesTitle, body);
+      }
+      stage.appendChild(page);
+      return { page, body };
+    };
+
+    const fits = ({ page, body }) => {
+      const items = bodyContent(body);
+      const last = items[items.length - 1];
+      if (!last) return true;
+      const footerTop = page
+        .querySelector(".print-page-footer")
+        .getBoundingClientRect().top;
+      return last.getBoundingClientRect().bottom <= footerTop - 8;
+    };
+
+    try {
+      let pageNumber = 1;
+      let current = createPage(pageNumber);
+
+      const finishPage = () => {
+        // Never leave a heading stranded at the bottom of a page
+        const items = bodyContent(current.body);
+        const last = items[items.length - 1];
+        if (items.length > 1 && /^H[1-6]$/.test(last.tagName)) {
+          current.body.removeChild(last);
+          queue.unshift({ type: "heading", element: last });
+        }
+        pages.push(current.page);
+        pageNumber++;
+        current = createPage(pageNumber);
+      };
+
+      while (queue.length > 0) {
+        const item = queue.shift();
+        current.body.appendChild(item.element);
+        if (fits(current)) continue;
+
+        const isAlone = bodyContent(current.body).length === 1;
+        const isHeading = /^H[1-6]$/.test(item.element.tagName);
+
+        if (!isHeading) {
+          const tail = this.splitBlockToFit(item.element, current.body, () =>
+            fits(current),
+          );
+          if (tail) {
+            queue.unshift({ type: "content", element: tail });
+            finishPage();
+            continue;
+          }
+        }
+
+        if (isAlone) {
+          // Too tall for any page; keep it rather than loop forever
+          finishPage();
+          continue;
+        }
+
+        current.body.removeChild(item.element);
+        queue.unshift(item);
+        finishPage();
+      }
+
+      if (bodyContent(current.body).length > 0) {
+        pages.push(current.page);
+      }
+
+      contentElement.innerHTML = "";
+      pages.forEach((page) => contentElement.appendChild(page));
+    } finally {
+      document.body.removeChild(host);
+    }
+  }
+
+  /**
+   * Resolve once images are loaded (or failed), with a safety timeout.
+   * @param {HTMLElement} root - Element containing images
+   */
+  waitForImages(root) {
+    const pending = Array.from(root.querySelectorAll("img"))
+      .filter((img) => !img.complete)
+      .map(
+        (img) =>
+          new Promise((resolve) => {
+            img.addEventListener("load", resolve, { once: true });
+            img.addEventListener("error", resolve, { once: true });
+          }),
+      );
+    if (pending.length === 0) return Promise.resolve();
+    return Promise.race([
+      Promise.all(pending),
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+    ]);
+  }
+
+  /**
+   * Split an overflowing block so the head fills the page. The head replaces
+   * `element` in `body`; the returned tail belongs on the next page.
+   * @param {HTMLElement} element - Block currently appended to body
+   * @param {HTMLElement} body - Page body
+   * @param {Function} fits - Returns true if the page content fits
+   * @returns {HTMLElement|null} Tail element, or null if it can't be split
+   */
+  splitBlockToFit(element, body, fits) {
+    if (/^(UL|OL)$/.test(element.tagName)) {
+      return this.splitListToFit(element, body, fits);
+    }
+    if (element.querySelector("p,ul,ol,div,table,figure,img,li")) return null;
+    return this.splitTextToFit(element, body, fits);
+  }
+
+  splitListToFit(list, body, fits) {
+    const items = Array.from(list.children);
+    const startAttr = parseInt(list.getAttribute("start"), 10) || 1;
+    let head = list;
+
+    for (let count = items.length - 1; count >= 1; count--) {
+      const candidate = list.cloneNode(false);
+      items
+        .slice(0, count)
+        .forEach((li) => candidate.appendChild(li.cloneNode(true)));
+      body.replaceChild(candidate, head);
+      head = candidate;
+      if (!fits()) continue;
+
+      const tail = list.cloneNode(false);
+      items
+        .slice(count)
+        .forEach((li) => tail.appendChild(li.cloneNode(true)));
+      if (list.tagName === "OL") tail.setAttribute("start", startAttr + count);
+      return tail;
+    }
+
+    body.replaceChild(list, head);
+    return null;
+  }
+
+  splitTextToFit(element, body, fits) {
+    const style = window.getComputedStyle(element);
+    const lineHeight =
+      parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.3;
+    const lines = Math.round(element.getBoundingClientRect().height / lineHeight);
+    // Too short to split without leaving an orphan or widow
+    if (lines < 4) return null;
+
+    const text = element.textContent;
+    const charsPerLine = text.length / lines;
+    const maxOffset = text.length - 2 * charsPerLine;
+
+    const breaks = [];
+    for (let i = 1; i < text.length; i++) {
+      if (/\s/.test(text[i]) && !/\s/.test(text[i - 1])) breaks.push(i);
+    }
+
+    const original = element.cloneNode(true);
+    const buildParts = (offset) => {
+      const head = original.cloneNode(true);
+      const walker = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
+      let seen = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        const length = node.nodeValue.length;
+        if (seen + length >= offset) {
+          const range = document.createRange();
+          range.setStart(node, offset - seen);
+          range.setEnd(head, head.childNodes.length);
+          const tail = head.cloneNode(false);
+          tail.appendChild(range.extractContents());
+          return { head, tail };
+        }
+        seen += length;
+      }
+      return null;
+    };
+
+    let shown = element;
+    let best = null;
+    let lo = 0;
+    let hi = breaks.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const parts = breaks[mid] <= maxOffset ? buildParts(breaks[mid]) : null;
+      if (!parts) {
+        hi = mid - 1;
+        continue;
+      }
+      body.replaceChild(parts.head, shown);
+      shown = parts.head;
+      if (fits()) {
+        best = parts;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+
+    if (best) {
+      body.replaceChild(best.head, shown);
+      shown = best.head;
+      if (best.head.getBoundingClientRect().height >= 2 * lineHeight - 1) {
+        return best.tail;
+      }
+    }
+
+    body.replaceChild(element, shown);
+    return null;
   }
 
   /**
