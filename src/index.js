@@ -681,7 +681,7 @@ class ThreatenedSpeciesFactsheet {
 
       return `
         <div class="sidebar-related-info mb-3">
-          <h2 class="sidebar-heading">Related information</h2>
+          <h1 class="sidebar-heading">Related information</h1>
           <div class="sidebar-content small">${processedContent}</div>
         </div>
       `;
