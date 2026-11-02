@@ -804,6 +804,8 @@ class ThreatenedSpeciesFactsheet {
     // Flatten sections into headings and content blocks
     const queue = [];
     Array.from(mainContent.children).forEach((section) => {
+      if (section.matches(".print-sidebar")) return;
+
       const heading = section.querySelector("h1");
       const content = section.querySelector(".section-content");
       if (heading) {

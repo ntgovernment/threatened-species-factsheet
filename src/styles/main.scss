@@ -458,12 +458,9 @@ h1:has(+ .factsheet-subtitle) {
     h1 {
       font-size: 1.15rem;
       margin-bottom: 0.4rem;
-      margin-top: 0.75rem;
+      margin-top: 0;
+      padding-top: 16px;
       color: #212529;
-
-      &:first-child {
-        margin-top: 0;
-      }
     }
 
     h2 {
