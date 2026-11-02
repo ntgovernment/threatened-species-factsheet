@@ -607,7 +607,9 @@ class ThreatenedSpeciesFactsheet {
 
     // Helper to render sidebar image
     const renderSidebarImage = () => {
-      if (!data.scientific_name || !data.taxon_id) return "";
+      if (!data.scientific_name || !data.taxon_id || !data.images?.[0]?.url) {
+        return "";
+      }
 
       const altText = this.escapeHtml(commonName || data.scientific_name);
       //const imageFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
@@ -1219,6 +1221,105 @@ class ThreatenedSpeciesFactsheet {
   /**
    * Generate and download PDF
    */
+  addSearchableTextAndLinks(pdf, page, pageBounds, imageWidth, imageHeight) {
+    if (!pageBounds.width || !pageBounds.height) return;
+
+    const scaleX = imageWidth / pageBounds.width;
+    const scaleY = imageHeight / pageBounds.height;
+    const toPdfRect = (rect) => {
+      const left = Math.max(0, rect.left - pageBounds.left);
+      const top = Math.max(0, rect.top - pageBounds.top);
+      const right = Math.min(pageBounds.width, rect.right - pageBounds.left);
+      const bottom = Math.min(pageBounds.height, rect.bottom - pageBounds.top);
+
+      if (right <= left || bottom <= top) return null;
+
+      return {
+        x: left * scaleX,
+        y: top * scaleY,
+        w: (right - left) * scaleX,
+        h: (bottom - top) * scaleY,
+      };
+    };
+
+    const textWalker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
+    let textNode;
+
+    while ((textNode = textWalker.nextNode())) {
+      const parent = textNode.parentElement;
+      if (!parent || !textNode.nodeValue.trim()) continue;
+      if (parent.closest("script, style, noscript, [aria-hidden='true']")) {
+        continue;
+      }
+
+      const style = window.getComputedStyle(parent);
+      if (style.display === "none" || style.visibility === "hidden") continue;
+
+      const lines = new Map();
+      const range = document.createRange();
+      for (let index = 0; index < textNode.nodeValue.length; index++) {
+        range.setStart(textNode, index);
+        range.setEnd(textNode, index + 1);
+        const rect = range.getBoundingClientRect();
+        if (!rect.width || !rect.height) continue;
+
+        const lineKey = Math.round(rect.top);
+        const line = lines.get(lineKey) || {
+          text: "",
+          left: rect.left,
+          bottom: rect.bottom,
+        };
+        line.text += textNode.nodeValue[index];
+        line.left = Math.min(line.left, rect.left);
+        line.bottom = Math.max(line.bottom, rect.bottom);
+        lines.set(lineKey, line);
+      }
+
+      for (const line of lines.values()) {
+        if (!line.text.trim()) continue;
+        const left = Math.max(pageBounds.left, line.left);
+        const bottom = Math.min(pageBounds.bottom, line.bottom);
+        if (left >= pageBounds.right || bottom <= pageBounds.top) continue;
+
+        const fontSize =
+          (parseFloat(style.fontSize) * scaleX * 72) / 25.4;
+        const fontStyle =
+          `${parseInt(style.fontWeight, 10) >= 600 ? "bold" : ""}${style.fontStyle === "italic" ? "italic" : ""}` ||
+          "normal";
+        pdf.setFont("helvetica", fontStyle);
+        pdf.setFontSize(fontSize);
+        pdf.text(
+          line.text,
+          (left - pageBounds.left) * scaleX,
+          (bottom - pageBounds.top) * scaleY,
+          { baseline: "bottom", renderingMode: "invisible" },
+        );
+      }
+    }
+
+    page.querySelectorAll("a[href]").forEach((anchor) => {
+      let url;
+      try {
+        url = new URL(anchor.href, document.baseURI);
+      } catch {
+        return;
+      }
+
+      if (!["http:", "https:", "mailto:", "tel:"].includes(url.protocol)) {
+        return;
+      }
+
+      Array.from(anchor.getClientRects()).forEach((rect) => {
+        const pdfRect = toPdfRect(rect);
+        if (pdfRect) {
+          pdf.link(pdfRect.x, pdfRect.y, pdfRect.w, pdfRect.h, {
+            url: url.href,
+          });
+        }
+      });
+    });
+  }
+
   async generatePDF() {
     if (this.isGeneratingPDF) return;
 
@@ -1271,6 +1372,7 @@ class ThreatenedSpeciesFactsheet {
         // Temporarily show page for rendering
         const originalDisplay = page.style.display;
         page.style.display = "block";
+        const pageBounds = page.getBoundingClientRect();
 
         // Generate canvas from page
         const canvas = await html2canvas(page, {
@@ -1304,6 +1406,7 @@ class ThreatenedSpeciesFactsheet {
 
         // Add image to PDF
         pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+        this.addSearchableTextAndLinks(pdf, page, pageBounds, imgWidth, imgHeight);
       }
 
       // Generate filename from species name

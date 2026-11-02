@@ -297,6 +297,10 @@ Check both the main sidebar renderer and printable sidebar helpers because the m
 3. Preview content corresponds to the selected species.
 4. Download button is enabled when idle.
 5. Conservation status remains readable in the preview.
+6. Exported PDF text can be selected and searched; HTTP(S), email, and telephone links open their destinations.
+7. PDF text and link overlays align with the rendered page images and do not obscure page content.
+
+PDF export keeps the rendered page appearance and adds an invisible text layer plus link annotations. The text layer supports search and selection but does not make the PDF tagged or guarantee PDF/UA screen-reader accessibility. Full PDF validation must include checking text search, copy order, page alignment, and each link destination in a PDF reader.
 
 ## Localhost Caveat
 

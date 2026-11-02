@@ -21,6 +21,7 @@ Use the docs by role:
 5. Renders sidebar media and Export to PDF controls into `.col-md-4.my-4.d-print-none`.
 6. Updates the document title, page H1, breadcrumb, and fauna subtitle.
 7. Builds a printable modal preview and generates a PDF with `html2canvas` and `jsPDF`.
+   Exported PDFs retain the page appearance while adding searchable/selectable text and clickable web, email, and telephone links. This does not produce a tagged PDF/UA document.
 
 ## Quick Start
 
