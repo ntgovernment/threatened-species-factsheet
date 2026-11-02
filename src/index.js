@@ -690,7 +690,7 @@ class ThreatenedSpeciesFactsheet {
     // Conservation status helper - simplified format
     const getStatusText = (status, label, act) => {
       if (!status) return "";
-      return `<p>${label}: ${this.escapeHtml(status)}<br><em>${this.escapeHtml(act)}</em></p>`;
+      return `<h2>${label}: ${this.escapeHtml(status)}</h2><p><em>${this.escapeHtml(act)}</em></p>`;
     };
 
     // Build printable HTML with continuous content flow
