@@ -539,9 +539,8 @@ h1:has(+ .factsheet-subtitle) {
 
       .ntg-logo {
         display: block;
-        width: 4rem;
         height: 1.8rem;
-        object-fit: contain;
+        width: auto;
         object-position: right bottom;
       }
     }
