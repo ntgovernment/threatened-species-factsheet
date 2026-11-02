@@ -575,6 +575,10 @@ h1:has(+ .factsheet-subtitle) {
       .sidebar-map {
         margin-bottom: 0.75rem;
 
+        .sidebar-photo + .sidebar-photo {
+          margin-top: 0.5rem;
+        }
+
         img {
           border: 1px solid #dee2e6;
           border-radius: 4px;

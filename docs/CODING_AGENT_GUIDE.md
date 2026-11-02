@@ -139,6 +139,7 @@ Pass criteria:
 3. Preview content matches the selected species.
 4. Download button is enabled when idle.
 5. Conservation status remains legible in preview if present.
+6. Species with zero, one, and four or more photos show zero, one, and at most three photos respectively; the distribution map remains separate.
 
 ### Localhost Caveat Handling
 

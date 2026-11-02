@@ -607,13 +607,45 @@ class ThreatenedSpeciesFactsheet {
 
     // Helper to render sidebar image
     const renderSidebarImage = () => {
-      if (!data.scientific_name || !data.taxon_id || !data.images?.[0]?.url) {
+      if (!data.scientific_name || !data.taxon_id) {
+        return "";
+      }
+
+      const images = (data.images || [])
+        .filter(
+          (image) =>
+            typeof image.url === "string" && /_photo\d*\.webp$/i.test(image.url),
+        )
+        .sort((a, b) => {
+          const getIndex = (url) => {
+            const match = url.match(/_photo(\d*)\.webp$/i);
+            return match ? (match[1] ? parseInt(match[1], 10) : 0) : 999;
+          };
+          return getIndex(a.url) - getIndex(b.url);
+        })
+        .slice(0, 3);
+
+      if (images.length === 0) {
         return "";
       }
 
       const altText = this.escapeHtml(commonName || data.scientific_name);
       //const imageFilename = `${data.scientific_name.replace(/\s+/g, "_")}_${data.taxon_id}`;
       //const imagePath = `https://nt.gov.au/_media/docs/environment/threatened-species/images/${imageFilename}_photo.webp`;
+
+      const imageHtml = images
+        .map(
+          (image) => `
+            <div class="sidebar-photo">
+              <img src="${image.url}"
+                   alt="${altText}"
+                   class="img-fluid"
+                   style="max-width: 100%; height: auto;"
+                   onerror="this.parentElement.style.display='none'" />
+            </div>
+          `,
+        )
+        .join("");
 
       let figcaptionText = "";
       if (commonName) {
@@ -628,11 +660,7 @@ class ThreatenedSpeciesFactsheet {
 
       return `
         <figure class="sidebar-image mb-3">
-          <img src="${data.images[0].url}" 
-               alt="${altText}" 
-               class="img-fluid"
-               style="max-width: 100%; height: auto;"
-               onerror="this.parentElement.style.display='none'" />
+          ${imageHtml}
           ${figcaptionText ? `<figcaption class="small mt-2">${figcaptionText}</figcaption>` : ""}
         </figure>
       `;
