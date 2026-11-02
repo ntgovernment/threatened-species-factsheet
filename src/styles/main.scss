@@ -471,6 +471,10 @@ h1:has(+ .factsheet-subtitle) {
 
     .conservation-status-line {
       margin-top: 16px;
+
+      &:first-of-type {
+        margin-top: 0;
+      }
     }
 
     h3 {
@@ -542,6 +546,11 @@ h1:has(+ .factsheet-subtitle) {
   .print-layout {
     display: flex;
     gap: 1.5rem;
+
+    .conservation-status-alert {
+      box-sizing: border-box;
+      width: calc(67% - 16px);
+    }
 
     .print-main-content {
       flex: 1;
