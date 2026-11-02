@@ -246,7 +246,7 @@ class ThreatenedSpeciesFactsheet {
     return `
                         <figure class="sidebar-image mb-4">
                   <div class="sidebar-image-container">
-                    <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs" data-height="350">
+                    <div class="fotorama" data-auto="false" data-loop="true" data-keyboard="true" data-nav="thumbs" data-width="100%" data-height="350" data-fit="contain" data-thumbwidth="64" data-thumbheight="48" data-thumbfit="cover" data-background="#fff">
                       ${imageHtml}
                     </div>
                   </div>

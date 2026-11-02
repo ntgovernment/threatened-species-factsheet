@@ -213,16 +213,19 @@ h1:has(+ .factsheet-subtitle) {
   .sidebar-image {
     .sidebar-image-container {
       width: 100%;
-      max-height: 350px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
       border-radius: 4px;
-      background-color: #f8f9fa;
+      background-color: #fff;
     }
 
-    img {
+    .fotorama,
+    .fotorama__stage,
+    .fotorama__nav-wrap,
+    .fotorama__nav {
+      background-color: #fff;
+    }
+
+    // Fotorama sizes its own images, so exclude them from this rule
+    img:not(.fotorama__img):not(.fotorama__thumb) {
       max-width: 100%;
       max-height: 350px;
       width: auto;
