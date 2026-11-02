@@ -690,7 +690,7 @@ class ThreatenedSpeciesFactsheet {
     // Conservation status helper - simplified format
     const getStatusText = (status, label, act) => {
       if (!status) return "";
-      return `<h2>${label}: ${this.escapeHtml(status)}</h2><p><em>${this.escapeHtml(act)}</em></p>`;
+      return `<h2 class="conservation-status-line">${label}: ${this.escapeHtml(status)}</h2><p><em>${this.escapeHtml(act)}</em></p>`;
     };
 
     // Build printable HTML with continuous content flow
@@ -805,6 +805,10 @@ class ThreatenedSpeciesFactsheet {
     const queue = [];
     Array.from(mainContent.children).forEach((section) => {
       if (section.matches(".print-sidebar")) return;
+      if (section.matches(".conservation-status-alert")) {
+        queue.push({ type: "content", element: section.cloneNode(true) });
+        return;
+      }
 
       const heading = section.querySelector("h1");
       const content = section.querySelector(".section-content");
