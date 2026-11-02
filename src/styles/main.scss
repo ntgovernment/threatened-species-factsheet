@@ -580,6 +580,9 @@ h1:has(+ .factsheet-subtitle) {
         }
 
         .sidebar-photo img {
+          width: 100%;
+          aspect-ratio: 3 / 2;
+          object-fit: cover;
           max-height: 4.5cm;
         }
 

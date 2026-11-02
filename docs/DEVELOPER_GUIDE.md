@@ -299,7 +299,7 @@ Check both the main sidebar renderer and printable sidebar helpers because the m
 5. Conservation status remains readable in the preview.
 6. Exported PDF text can be selected and searched; HTTP(S), email, and telephone links open their destinations.
 7. PDF text and link overlays align with the rendered page images and do not obscure page content.
-8. Species with zero, one, and four or more photos show zero, one, and at most three photos respectively; the three-photo stack stays within half a page, and the distribution map remains separate.
+8. Species with zero, one, and four or more photos show zero, one, and at most three photos respectively; photos use a 3:2 landscape crop, the three-photo stack stays within half a page, and the distribution map remains separate.
 
 PDF export keeps the rendered page appearance and adds an invisible text layer plus link annotations. The text layer supports search and selection but does not make the PDF tagged or guarantee PDF/UA screen-reader accessibility. Full PDF validation must include checking text search, copy order, page alignment, and each link destination in a PDF reader.
 
