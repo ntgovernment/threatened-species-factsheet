@@ -1102,11 +1102,21 @@ class ThreatenedSpeciesFactsheet {
   createPageFooter(pageNumber) {
     const footer = document.createElement("div");
     footer.className = "print-page-footer";
+    const updatedDate = this.data?.updated ? new Date(this.data.updated) : null;
+    const dateLabel =
+      updatedDate && !Number.isNaN(updatedDate.getTime())
+        ? updatedDate.toLocaleDateString("en-AU", {
+            day: "numeric",
+            month: "long",
+            timeZone: "UTC",
+            year: "numeric",
+          })
+        : "";
     footer.innerHTML = `
       <div class="footer-content">
         <div class="footer-left">
           <div class="footer-department">Department of Lands, Planning and Environment</div>
-          <div class="footer-meta">February 2026 | Page ${pageNumber}</div>
+          <div class="footer-meta">${dateLabel ? `${dateLabel} | ` : ""}Page ${pageNumber}</div>
         </div>
         <div class="footer-right">
           <img src="https://nt.gov.au/cdn/images/logos/logo-ntg-color.svg" alt="Northern Territory Government" class="ntg-logo" />
