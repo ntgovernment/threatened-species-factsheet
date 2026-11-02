@@ -538,8 +538,11 @@ h1:has(+ .factsheet-subtitle) {
       margin-left: 1rem;
 
       .ntg-logo {
+        display: block;
+        width: 4rem;
         height: 1.8rem;
-        width: auto;
+        object-fit: contain;
+        object-position: right bottom;
       }
     }
   }

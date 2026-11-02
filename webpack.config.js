@@ -33,6 +33,10 @@ module.exports = {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
+      {
+        test: /\.(png|jpe?g|webp)$/i,
+        type: "asset/inline",
+      },
     ],
   },
   plugins: [

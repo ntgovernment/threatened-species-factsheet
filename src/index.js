@@ -1,5 +1,6 @@
 // Import styles
 import "./styles/main.scss";
+import ntgLogo from "../ntg-logo.jpg";
 
 // Import PDF generation libraries
 import { jsPDF } from "jspdf";
@@ -1118,7 +1119,7 @@ class ThreatenedSpeciesFactsheet {
           <div class="footer-meta">${dateLabel ? `${dateLabel} | ` : ""}Page ${pageNumber}</div>
         </div>
         <div class="footer-right">
-          <img src="https://nt.gov.au/cdn/images/logos/logo-ntg-color.svg" alt="Northern Territory Government" class="ntg-logo" />
+          <img src="${ntgLogo}" alt="Northern Territory Government" class="ntg-logo" />
         </div>
       </div>
     `;
