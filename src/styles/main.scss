@@ -749,8 +749,9 @@ h1:has(+ .factsheet-subtitle) {
       font-size: 18pt;
       color: #f4551a !important;
       font-weight: 600;
-      margin-top: 14pt;
+      margin-top: 0;
       margin-bottom: 14pt;
+      padding-top: 16px;
       page-break-after: avoid;
     }
 
@@ -798,6 +799,10 @@ h1:has(+ .factsheet-subtitle) {
     // Sidebar smaller typography
     .print-sidebar {
       font-size: 9pt;
+
+      h1.sidebar-heading {
+        font-size: 18.4pt;
+      }
 
       h2 {
         font-size: 12pt !important;
