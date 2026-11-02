@@ -86,6 +86,8 @@ h1:has(+ .factsheet-subtitle) {
 }
 
 .conservation-status-alert {
+  width: 100%;
+  box-sizing: border-box;
   background: var(--clr-bg-default, #ffffff);
   border-left: 8px solid var(--clr-status-info, #107cc0);
   border-top: 1px solid var(--clr-status-info, #107cc0);
