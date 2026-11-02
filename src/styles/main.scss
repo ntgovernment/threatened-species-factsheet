@@ -579,6 +579,10 @@ h1:has(+ .factsheet-subtitle) {
           margin-top: 0.5rem;
         }
 
+        .sidebar-photo img {
+          max-height: 4.5cm;
+        }
+
         img {
           border: 1px solid #dee2e6;
           border-radius: 4px;
