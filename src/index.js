@@ -15,7 +15,6 @@ class ThreatenedSpeciesFactsheet {
     this.element = options.element || null;
     this.data = options.data || null;
     this.allowHtml = options.allowHtml || false;
-    this.currentPage = 1;
     this.totalPages = 0;
     this.isGeneratingPDF = false;
 
@@ -509,17 +508,6 @@ class ThreatenedSpeciesFactsheet {
           this.generatePDF();
         };
       }
-
-      // Add pagination button event listeners
-      const prevBtn = modalElement.querySelector("#prevPageBtn");
-      const nextBtn = modalElement.querySelector("#nextPageBtn");
-
-      if (prevBtn) {
-        prevBtn.onclick = () => this.previousPage();
-      }
-      if (nextBtn) {
-        nextBtn.onclick = () => this.nextPage();
-      }
     } else {
       console.error("Bootstrap Modal not available");
     }
@@ -548,19 +536,7 @@ class ThreatenedSpeciesFactsheet {
             </div>
             <div class="modal-footer d-print-none">
               <div class="pagination-controls me-auto">
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="prevPageBtn" disabled>
-                  <svg width="12" height="12" fill="currentColor" style="vertical-align: baseline;">
-                    <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                  </svg>
-                  Previous
-                </button>
-                <span class="page-indicator mx-3" id="pageIndicator">Page 1 of 1</span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="nextPageBtn" disabled>
-                  Next
-                  <svg width="12" height="12" fill="currentColor" style="vertical-align: baseline;">
-                    <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
-                  </svg>
-                </button>
+                <span class="page-indicator" id="pageIndicator"></span>
               </div>
               <div class="action-buttons">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -805,15 +781,11 @@ class ThreatenedSpeciesFactsheet {
 
     const pages = modalElement.querySelectorAll(".page-container");
     this.totalPages = pages.length;
-    this.currentPage = 1;
 
-    // Show first page, hide others
-    pages.forEach((page, index) => {
-      page.style.display = index === 0 ? "block" : "none";
-    });
-
-    this.updatePageIndicator();
-    this.updateNavigationButtons();
+    const indicator = modalElement.querySelector("#pageIndicator");
+    if (indicator) {
+      indicator.textContent = `${pages.length} ${pages.length === 1 ? "page" : "pages"}`;
+    }
   }
 
   /**
@@ -855,6 +827,7 @@ class ThreatenedSpeciesFactsheet {
     const stage = document.createElement("div");
     stage.className = "printable-factsheet";
     stage.style.transform = "none";
+    stage.style.setProperty("--preview-scale", "1");
     host.appendChild(stage);
     document.body.appendChild(host);
 
@@ -1162,76 +1135,6 @@ class ThreatenedSpeciesFactsheet {
     document.body.removeChild(tempDiv);
 
     return height;
-  }
-
-  /**
-   * Show specific page
-   * @param {number} pageNumber - Page number to show (1-indexed)
-   */
-  showPage(pageNumber) {
-    if (pageNumber < 1 || pageNumber > this.totalPages) return;
-
-    const modalElement = document.getElementById("factsheet-print-modal");
-    if (!modalElement) return;
-
-    const pages = modalElement.querySelectorAll(".page-container");
-
-    // Hide all pages
-    pages.forEach((page) => {
-      page.style.display = "none";
-    });
-
-    // Show target page (convert to 0-index)
-    if (pages[pageNumber - 1]) {
-      pages[pageNumber - 1].style.display = "block";
-    }
-
-    this.currentPage = pageNumber;
-    this.updatePageIndicator();
-    this.updateNavigationButtons();
-  }
-
-  /**
-   * Navigate to next page
-   */
-  nextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.showPage(this.currentPage + 1);
-    }
-  }
-
-  /**
-   * Navigate to previous page
-   */
-  previousPage() {
-    if (this.currentPage > 1) {
-      this.showPage(this.currentPage - 1);
-    }
-  }
-
-  /**
-   * Update page indicator text
-   */
-  updatePageIndicator() {
-    const indicator = document.getElementById("pageIndicator");
-    if (indicator) {
-      indicator.textContent = `Page ${this.currentPage} of ${this.totalPages}`;
-    }
-  }
-
-  /**
-   * Update navigation button states
-   */
-  updateNavigationButtons() {
-    const prevBtn = document.getElementById("prevPageBtn");
-    const nextBtn = document.getElementById("nextPageBtn");
-
-    if (prevBtn) {
-      prevBtn.disabled = this.currentPage === 1;
-    }
-    if (nextBtn) {
-      nextBtn.disabled = this.currentPage === this.totalPages;
-    }
   }
 
   /**
