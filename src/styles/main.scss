@@ -47,8 +47,8 @@ h1:has(+ .factsheet-subtitle) {
 .factsheet-subtitle {
   margin-top: 0;
   margin-bottom: $spacing-unit * 1.5;
-  font-size: 1.25rem;
-  // font-weight: 600;
+  font-size: 2rem;
+  font-weight: 700;
   line-height: 1.4;
 }
 
@@ -629,9 +629,10 @@ h1:has(+ .factsheet-subtitle) {
   }
 
   .print-subtitle {
-    font-size: 1rem;
+    font-size: 2rem;
     margin-bottom: 0.75rem;
     color: #6c757d;
+    font-weight: 600;
   }
 
   .print-section {
@@ -749,9 +750,10 @@ h1:has(+ .factsheet-subtitle) {
     }
 
     .print-subtitle {
-      font-size: 14pt;
+      font-size: 2rem;
       font-style: italic;
       margin-bottom: 12pt;
+      font-weight: 600;
     }
 
     // NT Gov typography - Section headings (H1, promoted from H2)

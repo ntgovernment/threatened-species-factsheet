@@ -562,8 +562,10 @@ class ThreatenedSpeciesFactsheet {
    */
   generatePrintableHTML(data) {
     const commonName = (data.common_name || "").trim();
-    const displayName = commonName || data.scientific_name;
-    const isScientificName = !commonName && !!data.scientific_name;
+    const isFlora = data.category === "Flora";
+    const displayName = (isFlora ? "" : commonName) || data.scientific_name;
+    const isScientificName =
+      !!data.scientific_name && (isFlora || !commonName);
     const escapedName = this.escapeHtml(displayName);
     const formattedName = isScientificName
       ? `<em>${escapedName}</em>`

@@ -118,8 +118,9 @@ Title rendering drives the document title, page H1, breadcrumb, and `.factsheet-
 | `.factsheet-subtitle` | Shown in italic with `scientific_name` only when H1 uses `common_name` | Never shown |
 | Breadcrumb | Mirrors H1 formatting | Italic `scientific_name` |
 | Document title | `displayName - Factsheet | NT.GOV.AU` | `scientific_name - Factsheet | NT.GOV.AU` |
+| Printable/PDF title | `common_name` when present, else italic `scientific_name` | Italic `scientific_name` only; `common_name` is ignored |
 
-Flora `common_name` values may exist in data, but they are intentionally ignored for title display.
+Flora `common_name` values may exist in data, but they are intentionally ignored for page and printable/PDF title display.
 
 ## Factsheet UI Notes
 

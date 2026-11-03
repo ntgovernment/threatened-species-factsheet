@@ -148,7 +148,12 @@ Fauna (all other categories):
 3. `.factsheet-subtitle`: italic `scientific_name` shown below H1 only when H1 uses `common_name`.
 4. Breadcrumb and document title mirror the displayed H1 behavior.
 
-Note: The printable modal preview title uses `common_name || scientific_name` by design and should not be confused with the page H1 rules.
+### Printable and PDF title rules
+
+- Flora: show italic `scientific_name` only; ignore `common_name` for the printable/PDF title.
+- Fauna: show `common_name` when present, with italic `scientific_name` beneath it; otherwise show italic `scientific_name` as the title.
+
+The printable title follows category-aware title behavior independently of the page H1 metadata.
 
 ## UI Structure and Render Paths
 

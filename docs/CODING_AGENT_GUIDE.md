@@ -32,6 +32,7 @@ Do not violate these without explicit instruction:
 8. Preserve category-aware title rules.
    - Flora H1 is always italic scientific name, with no subtitle.
    - Fauna H1 uses common name when present, with scientific subtitle.
+   - Printable/PDF title uses only italic scientific name for Flora; Fauna uses common name when present, with scientific subtitle.
 9. Preserve the split render model.
    - `generateFactsheetHTML()` for the main page
    - `generatePrintableHTML()` for the modal preview and PDF source
